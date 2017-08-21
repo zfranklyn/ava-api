@@ -1,5 +1,7 @@
 # AVA: Automated Virtual Assessment (API)
 
+[Google Doc](https://docs.google.com/document/d/1-5DcrXNCZVohuFtsjan31-YGezbRO1VjQb2FMrPQyEY/edit#)
+
 ## AVA Database Schema
 #### Participant
 ##### Fields:
