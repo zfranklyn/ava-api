@@ -87,7 +87,7 @@ Group can be a school, a company etc. Specific subcategories (e.g., teachers, st
 ##### Description:
 Tags are a way to assign unstructured data to various other pieces of data. For instance, a participant may be associated with “Teacher”, or with a custom tag of “Does not want to receive messages”; a Group (e.g., school) can also be associated with a tag of “SMS-only”. 
 
-#####Characteristics (Tags should be...):
+##### Characteristics (Tags should be...):
 * Renameable (all corresponding items should be renamed)
 * Deletable (all corresponding items should remove the tag)
 
