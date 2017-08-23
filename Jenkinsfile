@@ -17,7 +17,7 @@ pipeline {
       steps {
         sh "echo \"PR Number: ${prNumber}\""
         sh "echo \"github URL: ${githubURL}\""
-        sendMessageToSlack('good', "AVA-API: Build for Branch #${prNumber} intiated");
+        sendMessageToSlack('good', "AVA-API: Build for Branch #${prNumber} successful");
       }
     }
     stage('Build') {
