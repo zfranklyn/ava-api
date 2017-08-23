@@ -8,7 +8,7 @@ import * as express from "express";
 
 import { app } from "../app";
 // tslint:disable
-const debug = require("debug")("server");
+const debug = require("debug")("debug/server");
 const http = require("http");
 // tslint:enable
 

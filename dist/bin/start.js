@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var app_1 = require("../app");
 // tslint:disable
-var debug = require("debug")("TRUE");
+var debug = require("debug")("debug/server");
 var http = require("http");
 // tslint:enable
 /**
