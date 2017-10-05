@@ -1,8 +1,26 @@
 import * as Sequelize from 'sequelize';
 
-import { db } from './db';
+import { db } from './_db';
 
 // tslint:disable
+export const Researcher = db.define('researcher', {
+    name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    email: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        validate: {
+            isEmail: true,
+        },
+    },
+    tel: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+});
+
 export const Participant = db.define('participant', {
     name: {
         type: Sequelize.STRING,
@@ -18,7 +36,16 @@ export const Participant = db.define('participant', {
     tel: {
         type: Sequelize.STRING,
         allowNull: false,
-    }
+    },
+    // teacher, student, administrator, parent
+    role: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    notes: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+    },
 });
 
 export const Message = db.define('message', {
@@ -131,5 +158,4 @@ export const Schedule = db.define('schedule', {
             max: 86400,
         }
     },
-
 })

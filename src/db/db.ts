@@ -1,11 +1,11 @@
-import * as Sequelize from 'sequelize';
+import { db } from './_db';
 
-const dbURI = 'abc';
+// Import DB Models
+import { Message, Participant, Schedule, Study, Tag } from './models';
 
-export const db  = new Sequelize(dbURI, {
-    define: {
-        timestamps: true,
-        underscored: true,
-    },
-    logging: false,
-});
+// Define relationships between models
+
+Participant.hasMany(Tag);
+Participant.belongsToMany(Study, {through: 'ParticipantStudy'});
+
+Study.hasMany(Tag);
