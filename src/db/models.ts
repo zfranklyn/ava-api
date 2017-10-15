@@ -19,6 +19,14 @@ export const Researcher = db.define('researcher', {
         type: Sequelize.STRING,
         allowNull: false,
     },
+    username: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    password: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    }
 });
 
 export const Participant = db.define('participant', {
@@ -49,14 +57,6 @@ export const Participant = db.define('participant', {
 });
 
 export const Message = db.define('message', {
-    sender: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-    },
-    recipient: {
-        type: Sequelize.STRING,
-        allowNull: false,
-    },
     text: {
         type: Sequelize.TEXT,
         allowNull: false,
@@ -71,91 +71,52 @@ export const Message = db.define('message', {
         type: Sequelize.TEXT,
         allowNull: false,
     }
-
 });
 
 export const Tag = db.define('tag', {
     text: {
         type: Sequelize.STRING,
         allowNull: false,
+    },
+    color: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        defaultValue: '#137CBD',
     }
 });
 
 export const Study = db.define('study', {
-    surveyLink: {
+    title: {
         type: Sequelize.STRING,
         allowNull: false,
-        validate: {
-            isURL: true,
-        }
     },
-    reminderText: {
+    description: {
         type: Sequelize.TEXT,
         allowNull: true,
     },
-    timezone: {
-        type: Sequelize.INTEGER,
+    metadata: {
+        type: Sequelize.STRING,
         allowNull: false,
-    },
+        defaultValue: '{}', // stringified JSON
+    }
 });
 
-export const Schedule = db.define('schedule', {
-    startDate: {
-        type: Sequelize.DATE,
+export const Task = db.define('task', {
+    timestamp: {
+        type: Sequelize.TIME,
         allowNull: false,
     },
-    endDate: {
-        type: Sequelize.DATE,
+    type: {
+        type: Sequelize.ENUM('SMS', 'EMAIL', 'REMINDER', 'MESSAGE', 'RESET'),
         allowNull: false,
     },
-    // seconds elapsed since 00:00
-    mondayTime: {
-        type: Sequelize.INTEGER,
+    message: {
+        type: Sequelize.TEXT,
         allowNull: true,
-        validate: {
-            max: 86400,
-        }
     },
-    tuesdayTime: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        validate: {
-            max: 86400,
-        }
-    },
-    wednesdayTime: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        validate: {
-            max: 86400,
-        }
-    },
-    thursdayTime: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        validate: {
-            max: 86400,
-        }
-    },
-    fridayTime: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        validate: {
-            max: 86400,
-        }
-    },
-    saturdayTime: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        validate: {
-            max: 86400,
-        }
-    },
-    sundayTime: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        validate: {
-            max: 86400,
-        }
+    completed: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
     },
 })

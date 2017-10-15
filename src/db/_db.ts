@@ -1,6 +1,6 @@
 import * as Sequelize from 'sequelize';
 
-const dbURI = 'abc';
+const dbURI = 'postgres://localhost:5432/';
 
 export const db  = new Sequelize(dbURI, {
     define: {

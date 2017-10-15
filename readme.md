@@ -49,3 +49,10 @@ Schedule is an object that specifies when to do something.
 ### Task
 Tasks are generated based off of schedules. Every time a study is edited, the server generates a list of tasks based off of their schedules. The server will then check every single minute to see if a task needs to be executed.
 
+The task will pull data (text, survey links) from the most updated study information. Keep task data at a minimum (only time, study, target audience)
+
+##### Creating a Study
+1. Study is created with schedule (e.g., Monday & Wednesdsay at 4PM for the next eight weeks)
+2. When you hit "Save", the server generates a list of tasks based on the schedule
+
+##### Editing a study
