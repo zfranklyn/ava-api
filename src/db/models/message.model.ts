@@ -9,6 +9,7 @@ export type MediumType =
 export type MessageType =
 'SURVEY'
 | 'REMINDER'
+| 'REPLY'
 | 'CUSTOM';
 
 export interface IMessage {
@@ -23,7 +24,7 @@ export const MessageModel = db.define('message', {
       allowNull: false,
   },
   messageType: {
-      type: Sequelize.ENUM('SURVEY', 'REMINDER', 'CUSTOM'),
+      type: Sequelize.ENUM('SURVEY', 'REMINDER', 'CUSTOM', 'REPLY'),
       allowNull: false,
   },
   medium: {

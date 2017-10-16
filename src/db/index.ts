@@ -1,18 +1,21 @@
 import { db } from './_db';
 
 // Import DB Models
-import { MessageModel, UserModel, StudyModel, TagModel, TaskModel } from './models';
+import { UserModel } from './models/user.model';
+import { MessageModel } from './models/message.model';
+import { StudyModel } from './models/study.model';
+import { TagModel } from './models/tag.model';
+import { TaskModel } from './models/task.model';
 
 // Define relationships between models
+UserModel.hasMany(TagModel);
+UserModel.belongsToMany(StudyModel, {through: 'UserStudy'});
+UserModel.hasMany(MessageModel);
 
-// UserModel.hasMany(TagModel);
-// UserModel.belongsToMany(StudyModel, {through: 'UserStudy'});
-// UserModel.hasMany(MessageModel);
+MessageModel.belongsTo(StudyModel);
 
-// MessageModel.hasOne(UserModel, {as: 'sender'});
-// MessageModel.hasOne(UserModel, {as: 'recipient'});
-
-// StudyModel.hasMany(TagModel);
-// StudyModel.hasMany(TaskModel);
+StudyModel.hasMany(UserModel);
+StudyModel.hasMany(TagModel);
+StudyModel.hasMany(TaskModel);
 
 export default db;

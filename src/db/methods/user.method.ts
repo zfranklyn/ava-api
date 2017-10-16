@@ -1,5 +1,5 @@
 // tslint:disable
-const debug = require('debug')('debug/user-service');
+const debug = require('debug')('debug/user-method');
 
 import { UserModel, IUser, UserRoleType, UserType } from './../models/user.model';
 
@@ -23,10 +23,10 @@ interface INewParticipant {
 export const createResearcher = (params: INewResearcher) => {
   debug(`Creating Researcher`);
   const newUserParams: IUser = {
-    firstName: params.firstName, 
-    lastName: params.lastName, 
+    firstName: params.firstName,
+    lastName: params.lastName,
     tel: params.tel,
-    email: params.email, 
+    email: params.email,
     userType: 'RESEARCHER',
     userRole: 'ADMIN',
     username: params.username,

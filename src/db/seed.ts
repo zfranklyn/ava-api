@@ -3,13 +3,13 @@
 const debug = require('debug')('debug/seed');
 
 import * as faker from 'faker';
-import * as UserService from './services';
+import * as UserService from './methods/user.method';
 import { UserRoleType } from './models';
 import { db } from './_db';
 
 export const seedDatabase = () => {
-  seedParticipants(20);
-  seedResearchers();
+  // seedParticipants(20);
+  // seedResearchers();
 };
 
 const seedParticipants = (num: number) => {

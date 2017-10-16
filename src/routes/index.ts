@@ -1,3 +1,3 @@
-import { ParticipantRouter } from './participant.router';
+import { UserRouter } from './user.router';
 
-export { ParticipantRouter };
+export { UserRouter };
