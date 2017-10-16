@@ -9,6 +9,8 @@ import * as express from 'express';
 import { app } from '../app';
 import db from '../db';
 
+import { seedDatabase } from '../db/seed';
+
 // tslint:disable
 const debug = require('debug')('debug/server');
 const http = require('http');
@@ -100,6 +102,7 @@ function connectDB() {
   db.sync({force: true})
   .then(() => {
     debug('Database is Connected');
+    seedDatabase();
   })
   .catch((err: Error) => {
     debug('Database Connection Failed');

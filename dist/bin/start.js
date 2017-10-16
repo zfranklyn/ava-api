@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var app_1 = require("../app");
 var db_1 = require("../db");
+var seed_1 = require("../db/seed");
 // tslint:disable
 var debug = require('debug')('debug/server');
 var http = require('http');
@@ -76,6 +77,7 @@ function connectDB() {
     db_1.default.sync({ force: true })
         .then(function () {
         debug('Database is Connected');
+        seed_1.seedDatabase();
     })
         .catch(function (err) {
         debug('Database Connection Failed');
