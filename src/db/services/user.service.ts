@@ -3,28 +3,48 @@ const debug = require('debug')('debug/server');
 
 import { UserModel, IUser, UserRoleType, UserType } from './../models';
 
-export const createResearcher = (name: string, tel: string, email: string, username: string, password: string) => {
-  debug(`Creating Researcher`);
-  const newUserParams: IUser = {
-    name, tel, email, 
-    userType: 'RESEARCHER',
-    userRole: 'ADMIN',
-    username,
-    password,
-  }
+interface INewResearcher {
+  name: string;
+  tel: string;
+  email: string;
+  username: string;
+  password: string;
+}
 
-  return UserModel.create(newUserParams);
-};
+interface INewParticipant {
+  name: string;
+  tel: string;
+  email: string;
+  userRole: UserRoleType;
+}
 
-export const createParticipant = (name: string, tel: string, email: string, userRole: UserRoleType) => {
-  debug('Creating Participant');
-  const newUserParams: IUser = {
-    name,
-    tel,
-    email,
-    userType: 'PARTICIPANT',
-    userRole: userRole,
-  }
+export class UserService {
 
-  return UserModel.create(newUserParams);
-};
+  public createResearcher = (params: INewResearcher) => {
+    debug(`Creating Researcher`);
+    const newUserParams: IUser = {
+      name: params.name, 
+      tel: params.tel,
+      email: params.email, 
+      userType: 'RESEARCHER',
+      userRole: 'ADMIN',
+      username: params.username,
+      password: params.password,
+    }
+  
+    return UserModel.create(newUserParams);
+  };
+
+  public createParticipant = (params: INewParticipant) => {
+    debug('Creating Participant');
+    const newUserParams: IUser = {
+      name: params.name,
+      tel: params.tel,
+      email: params.email,
+      userType: 'PARTICIPANT',
+      userRole: params.userRole,
+    }
+  
+    return UserModel.create(newUserParams);
+  };
+}
