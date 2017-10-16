@@ -12,124 +12,47 @@ Participant can be created in three ways: 1) manually created by a Researcher, 2
 * email
 * notes (custom text description of user)
 
-##### Associations:
-* Participant hasMany Messages
-* Participant hasOne Thread
-* Participant hasMany Studies
-* Participant belongsTo Group
-* Participant hasMany Tags
-* Researcher
-
-##### Fields:
-* name
-* tel
-* email
-* username
-* password
-
-##### Associations:
-* Researcher hasMany Studies
-* Researcher hasMany Messages
-* Researcher hasMany Tags
-* Researcher BelongsToMany Groups
-* Researcher BelongsToMany Studies
-
 ### Message
-A message is a generic communication class. Researchers can send dynamic messages with interpolated data. Even automatic system messages have an associated Researcher, because it is the Researcher who set up the automated sending.
+How are messages sent?
+* email
+* SMS
+This categorization directs messages to different APIs — SMS uses Twilio, email uses SendGrid
 
-##### Fields:
-* text
-* format (enum: “sms”, “email”)
-* timestamp
-* payload (JSON object allows us to interpolate dynamic data into string)
-* automated (boolean)
-* type (message, reminder, survey)
+What types of messages are there?
+* survey
+* reminder
+* custom message
+This distinction is necessary to track when last surveys were sent, when last reminders were sent.
 
-##### Associations:
-* Message belongsTo Participant
-* Message belongsTo Researcher
-* Message belongsTo Study
-* Messages are either sent as part of a Study, or they are not (ad hoc messages)
-	* This allows us to see which messages have been sent as part of a Study
-* Message belongsTo Thread
-* Message hasMany Tags
-* Thread
-* Messages can only exist between two parties (group messages don’t make sense in a system like this), therefore Messages must belong to a Thread. 
+##### Fields
+* title
+* message
+* medium (SMS, email)
+* type (survey, reminder, customMessage)
 
-##### Fields:
-* name
-* permissions (TBD)
+### Tag
+Tags are tagged onto entities in order to filter things. For instance, you could have a geographic tag of "Bhutan", or a functional tag of "biweekly survey". I'll leave it up to the Researcher to manage these tags. Why? Because I don't want to hardcode any preexisting categories for filtering in case the model we adopt now becomes obsolete.
 
-##### Associations:
-*Thread hasMany Messages
-* Thread hasMany Researchers
-* All communication between researchers (from various different studies) and the participant belong in a single thread
-* Thread belongsTo Participant
-* Thread hasMany Tags
+### Metadata
+Metadata can be associated with various types of users. For instance, researchers can define `noSMS: true` for a user that doesn't want to receive SMSs. 
 
-### Group
-##### Description:
-Group can be a school, a company etc. Specific subcategories (e.g., teachers, students, administrators) are set using Tags. You can also create your own groups out of participants from different schools (i.e., there can be overlaps). You can create studies within Groups.
-
-##### Fields:
-* name
-* tags
-* description
-* location?
-
-##### Associations:
-* Group hasMany Tags
-* Group hasMany Participants
-* Group hasMany Researchers
-* Group hasMany Studies
-
-### Tags
-##### Description:
-Tags are a way to assign unstructured data to various other pieces of data. For instance, a participant may be associated with “Teacher”, or with a custom tag of “Does not want to receive messages”; a Group (e.g., school) can also be associated with a tag of “SMS-only”. 
-
-##### Characteristics (Tags should be...):
-* Renameable (all corresponding items should be renamed)
-* Deletable (all corresponding items should remove the tag)
-
-##### Fields:
-* name
-* description
-
-##### Associations:
-* NA
+This allows us to eventually build up more complicated logic (should need be). This should be defined in a NoSQL database.
 
 ### Study
-A Study must have a corresponding “parent” Group, and cannot be standalone (if you want to create an intra-group study, you must first create a new Group). 
+A study is a scheduled messaging regime. It's probably safe to assume that in our MVP, we only need to consider surveys. A study needs to specify its base survey link and custom text.
 
-A study is essentially a single scheduled message with follow-up reminders
+Custom text interpolates the survey link and variables wherever users specify. Variables interpolatable include `userID`, user names, telephones etc (essentially whatever metadata we have on the users).
 
-A study should have a set of Tasks, where researchers can predefine messages to send. Researcher should be able to send “informal messages” to subsets of participants.
+### Schedule
+Schedule is an object that specifies when to do something.
 
-##### Fields:
-* name
-* description
-* active (boolean)
-* message_schedule (array of strings, each a timestamp)
-* reminder_schedule (array of strings, each a timestamp)
-* start_date
-* end_date
+### Task
+Tasks are generated based off of schedules. Every time a study is edited, the server generates a list of tasks based off of their schedules. The server will then check every single minute to see if a task needs to be executed.
 
-##### Associations:
-* Study hasMany Participants
-* Study belongsToMany Researchers
-* Study hasMany Tags
-* Study belongsTo Group
+The task will pull data (text, survey links) from the most updated study information. Keep task data at a minimum (only time, study, target audience)
 
-## Scheduling System Overview
-Active studies contain messages that are sent automatically according to a Researcher-defined schedule. How does it work?
+##### Creating a Study
+1. Study is created with schedule (e.g., Monday & Wednesdsay at 4PM for the next eight weeks)
+2. When you hit "Save", the server generates a list of tasks based on the schedule
 
-Every time one of the following happens:
-* API server is reset
-* A Study is activated/deactivated
-* CRUD actions are performed on a Study
-* 00:00 CT has passed
-
-The API server will query the DB for all studies, and use setTimeout to schedule associated tasks. For instance, the API server will iterate through every single active study, and create tasks from startup until 00:00
-
-
-
+##### Editing a study
