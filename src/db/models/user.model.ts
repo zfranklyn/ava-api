@@ -13,7 +13,8 @@ export type UserRoleType =
   | 'OTHER';
 
 export interface IUser {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   tel: string;
   userType: UserType;
@@ -24,7 +25,11 @@ export interface IUser {
 }
 
 export const UserModel = db.define('user', {
-  name: {
+  firstName: {
+      type: Sequelize.STRING,
+      allowNull: false,
+  },
+  lastName: {
       type: Sequelize.STRING,
       allowNull: false,
   },
@@ -53,7 +58,7 @@ export const UserModel = db.define('user', {
   },
   password: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: true,
   },
   notes: {
       type: Sequelize.TEXT,
