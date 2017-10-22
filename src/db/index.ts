@@ -10,12 +10,13 @@ import { TaskModel } from './models/task.model';
 // Define relationships between models
 UserModel.hasMany(TagModel);
 UserModel.belongsToMany(StudyModel, {through: 'UserStudy'});
+StudyModel.belongsToMany(UserModel, {through: 'UserStudy'});
 UserModel.hasMany(MessageModel);
-
 MessageModel.belongsTo(StudyModel);
 
-StudyModel.hasMany(UserModel);
 StudyModel.hasMany(TagModel);
+StudyModel.belongsTo(UserModel, {as: 'Creator'});
 StudyModel.hasMany(TaskModel);
+TaskModel.belongsTo(StudyModel);
 
 export default db;
