@@ -21,4 +21,9 @@ export const StudyModel = db.define('study', {
       allowNull: false,
       defaultValue: '{}', // stringified JSON
   },
+  active: {
+      type: Sequelize.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+  },
 });

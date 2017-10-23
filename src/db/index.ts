@@ -16,6 +16,8 @@ MessageModel.belongsTo(StudyModel);
 
 StudyModel.hasMany(TagModel);
 StudyModel.belongsTo(UserModel, {as: 'Creator'});
+
+// tasks
 StudyModel.hasMany(TaskModel);
 TaskModel.belongsTo(StudyModel);
 

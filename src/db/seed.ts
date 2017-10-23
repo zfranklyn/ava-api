@@ -6,6 +6,7 @@ import * as faker from 'faker';
 import * as UserModel from './models/user.model';
 import * as TaskModel from './models/task.model';
 import * as StudyModel from './models/study.model';
+import * as TagModel from './models/tag.model';
 import { UserRoleType } from './models';
 import { db } from './_db';
 
@@ -29,7 +30,16 @@ const seedParticipants = async (num: number) => {
         tel: faker.phone.phoneNumber(),
         userType: 'PARTICIPANT',
         userRole: faker.helpers.randomize(['TEACHER', 'ADMIN', 'STUDENT']) as UserRoleType,
-      });
+      })
+        .then((newParticipant: any) => {
+          TagModel.TagModel.create({
+            text: 'Student',
+            color: TagModel.Color.FOREST,
+          })
+            .then((newTag) => {
+              newParticipant.addTag(newTag);
+            });
+        });
     }
     resolve();
   });
@@ -66,25 +76,31 @@ const seedStudies = async (num: number) => {
   return new Promise ((resolve, reject) => {
     for (let n = 0; n < num; n++) {
       StudyModel.StudyModel.create({
-        title: faker.lorem.words(3),
-        description: faker.lorem.sentences(2),
+        title: faker.lorem.words(4),
+        description: faker.lorem.sentences(3),
         metadata: '{}',
       })
       .then((newStudy: any) => {
         // assign administrators
-        UserModel.UserModel.findAll({
-        })
-        .then((allUsers: any[]) => {
-          const admins = allUsers.filter((user: any) => user.userType === 'RESEARCHER');
-          const participants = allUsers.filter((user: any) => user.userType === 'PARTICIPANT');
+        UserModel.UserModel.findAll()
+          .then((allUsers: any[]) => {
+            const admins = allUsers.filter((user: any) => user.userType === 'RESEARCHER');
+            const participants = allUsers.filter((user: any) => user.userType === 'PARTICIPANT');
 
-          newStudy.setCreator(admins[0]);
-          newStudy.addUsers(participants);
+            newStudy.setCreator(admins[0]);
+            newStudy.addUsers(participants);
+          });
 
+        TagModel.TagModel.create({
+          text: faker.lorem.words(2),
+          color: TagModel.Color.BLUE,
         })
-        .then(() => {
-          resolve();
-        });
+          .then((newTag) => {
+            newStudy.addTag(newTag);
+          })
+          .then(() => {
+            resolve();
+          });
       });
     }
   });
@@ -99,12 +115,13 @@ const seedTasks = async (numTasks: number) => {
         for (let n = 0; n < numTasks; n++) {
           TaskModel.TaskModel.create({
             timestamp: new Date(),
-            type: 'SMS',
+            type: 'SURVEY',
+            medium: 'SMS',
             message: faker.lorem.sentences(2),
             completed: false,
           }).then((createdTask: any) => {
             debug('created task');
-            createdTask.setStudy(study);
+            study.addTask(createdTask);
           });
         }
       });

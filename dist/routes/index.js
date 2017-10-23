@@ -1,4 +1,7 @@
 "use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
 Object.defineProperty(exports, "__esModule", { value: true });
-var user_router_1 = require("./user.router");
-exports.UserRouter = user_router_1.UserRouter;
+__export(require("./user.router"));
+__export(require("./study.router"));
