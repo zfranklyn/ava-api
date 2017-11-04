@@ -12,7 +12,7 @@ import { db } from './_db';
 
 export const seedDatabase = async () => {
   debug('Seeding Database');
-  await seedParticipants(5);
+  await seedParticipants(500);
   await seedResearchers();
   await seedStudies(3);
   await seedTasks(3);
