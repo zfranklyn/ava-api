@@ -4,15 +4,17 @@ let express = require('express');
 // tslint:enable
 
 const UserRouter = express.Router();
-import * as UserModel from '../db/models/user.model';
-import * as StudyModel from '../db/models/study.model';
-import * as TaskModel from '../db/models/task.model';
+import {
+  UserModel,
+  StudyModel,
+  TaskModel,
+ } from '../db/models/index';
 
 UserRouter.get('/participants', (req: any, res: any, next: any) => {
   const startIndex = req.query.startIndex;
   const num = req.query.num;
 
-  UserModel.UserModel.findAll({
+  UserModel.findAll({
     where: {
       userType: 'PARTICIPANT',
     },
@@ -24,8 +26,8 @@ UserRouter.get('/participants', (req: any, res: any, next: any) => {
 
 UserRouter.get('/participants/details', (req: any, res: any, next: any) => {
   const userId = req.query.userId;
-  UserModel.UserModel.findAll({
-    include: [{all: true}, { model: StudyModel.StudyModel, include: [{model: TaskModel.TaskModel}]}],
+  UserModel.findAll({
+    include: [{all: true}, { model: StudyModel, include: [{model: TaskModel}]}],
     where: {
       id: userId,
     },
@@ -36,7 +38,7 @@ UserRouter.get('/participants/details', (req: any, res: any, next: any) => {
 });
 
 UserRouter.get('/researchers', (req: any, res: any, next: any) => {
-  UserModel.UserModel.findAll({
+  UserModel.findAll({
     where: {
       userType: 'RESEARCHER',
     },

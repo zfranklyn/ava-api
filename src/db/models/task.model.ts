@@ -1,20 +1,6 @@
 import * as Sequelize from 'sequelize';
 import { db } from './../_db';
-import { MediumType } from './message.model';
-
-export type TaskType =
-'CUSTOM_MESSAGE'
-| 'SURVEY'
-| 'REMINDER'
-| 'RESET';
-
-export interface ITask {
-  timestamp: string;
-  type: TaskType;
-  medium: MediumType;
-  message: string;
-  completed: boolean;
-}
+import { MediumType } from './../sharedTypes';
 
 export const TaskModel = db.define('task', {
   timestamp: {

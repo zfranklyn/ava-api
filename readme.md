@@ -1,58 +1,45 @@
 # AVA Database Schema
 
-The following notes outline the relational database schema for AVA's backend system. We'll use [Sequelize](http://docs.sequelizejs.com/), a Node.js ORM for RDBs, and host our Postgres DBs on Amazon Redshift.
+The following notes outline the relational database schema for AVA's backend system. We'll use [Sequelize](http://docs.sequelizejs.com/), a Node.js ORM for RDBs, and host our Postgres DBs on Amazon Redshift. Supplementary NoSQL databases will use AWS DynamoDB.
 
+### Studies
+User creates a study in order to schedule a survey for a group of participants. It represents one interaction with a group of people. 
 
-### Participant
-Participant can be created in three ways: 1) manually created by a Researcher, 2) be sent a customized link to a Participant creation form, 3) navigate to a vanilla creation page and create themselves from scratch.
+User creates a study, specifying:
+* What survey link to send
+* Who the survey is sent to
+* How the survey is sent (SMS, Email, App)
+* How many reminders to set
 
-##### Fields:
-* name
-* tel (SMS authentication for login)
-* email
-* notes (custom text description of user)
+User can also specify the specific text used in the messages.
 
-### Message
-How are messages sent?
-* email
-* SMS
-This categorization directs messages to different APIs — SMS uses Twilio, email uses SendGrid
+User can also send mass announcements to users, and also filter that announcement by completion status.
 
-What types of messages are there?
-* survey
-* reminder
-* custom message
-This distinction is necessary to track when last surveys were sent, when last reminders were sent.
+### Recruitment
+Participants are recruited to the platform through a few ways:
 
-##### Fields
-* title
-* message
-* medium (SMS, email)
-* type (survey, reminder, customMessage)
+1. Sign up
+Participants proactively go to a link, fill out a complete form.
 
-### Tag
-Tags are tagged onto entities in order to filter things. For instance, you could have a geographic tag of "Bhutan", or a functional tag of "biweekly survey". I'll leave it up to the Researcher to manage these tags. Why? Because I don't want to hardcode any preexisting categories for filtering in case the model we adopt now becomes obsolete.
+2. Text signup link
+Participants text a number, and receive a custom link to a semi-completed form
 
-### Metadata
-Metadata can be associated with various types of users. For instance, researchers can define `noSMS: true` for a user that doesn't want to receive SMSs. 
+3. Manual Add
+User can add a participant manually into the system.
 
-This allows us to eventually build up more complicated logic (should need be). This should be defined in a NoSQL database.
+### Send Messages
 
-### Study
-A study is a scheduled messaging regime. It's probably safe to assume that in our MVP, we only need to consider surveys. A study needs to specify its base survey link and custom text.
+### Tasks
+A scheduled task can be specified to send a message, initiate a reset (to a data collection period), send a reminder, or simply send an announcement. 
 
-Custom text interpolates the survey link and variables wherever users specify. Variables interpolatable include `userID`, user names, telephones etc (essentially whatever metadata we have on the users).
+The system will run a check every minute, and run tasks as they come up.
 
-### Schedule
-Schedule is an object that specifies when to do something.
+Example: we have a task that stipulates sending a survey to every student at Yale at 12:00PM. At 12:00PM, the system checks and discovers an active task at that minute, and executes it. It sends a couple thousand messages. 
 
-### Task
-Tasks are generated based off of schedules. Every time a study is edited, the server generates a list of tasks based off of their schedules. The server will then check every single minute to see if a task needs to be executed.
+How do we keep track of who's done a message, and who has not?
 
-The task will pull data (text, survey links) from the most updated study information. Keep task data at a minimum (only time, study, target audience)
+A Task is associated with a Study, which in turn is associated with Participants. Therefore, we should know exactly how many participants are involved. We need some way to keep track of who's done the survey and who hasn't. I think this should be linked to each individual task, because once a task is completed, it's done (and we want historic reference too, trackable back to participants).
 
-##### Creating a Study
-1. Study is created with schedule (e.g., Monday & Wednesdsay at 4PM for the next eight weeks)
-2. When you hit "Save", the server generates a list of tasks based on the schedule
+If it's a survey task, then create a 'status' for every user, and use that to keep track of response rates.
 
-##### Editing a study
+That means reminders need to be linked with a 'parent' survey, so that they know who has/hasn't completed the survey.

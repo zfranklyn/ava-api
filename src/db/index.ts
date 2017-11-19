@@ -1,11 +1,14 @@
 import { db } from './_db';
 
 // Import DB Models
-import { UserModel } from './models/user.model';
-import { MessageModel } from './models/message.model';
-import { StudyModel } from './models/study.model';
-import { TagModel } from './models/tag.model';
-import { TaskModel } from './models/task.model';
+import {
+  UserModel,
+  MessageModel,
+  StudyModel,
+  TagModel,
+  TaskModel,
+  StatusModel,
+} from './models/index';
 
 // Define relationships between models
 UserModel.hasMany(TagModel);
@@ -20,5 +23,7 @@ StudyModel.belongsTo(UserModel, {as: 'Creator'});
 // tasks
 StudyModel.hasMany(TaskModel);
 TaskModel.belongsTo(StudyModel);
+TaskModel.hasOne(StatusModel, { as: 'SurveyStatus'});
+UserModel.hasMany(StatusModel, { as: 'SurveyStatus' });
 
 export default db;
