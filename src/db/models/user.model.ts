@@ -1,29 +1,6 @@
 import * as Sequelize from 'sequelize';
 import { db } from './../_db';
 
-export type UserType =
-  'RESEARCHER'
-  | 'PARTICIPANT';
-
-export type UserRoleType =
-  'TEACHER'
-  | 'STUDENT'
-  | 'ADMIN'
-  | 'PARENT'
-  | 'OTHER';
-
-export interface IUser {
-  firstName: string;
-  lastName: string;
-  email: string;
-  tel: string;
-  userType: UserType;
-  userRole: UserRoleType;
-  username?: string;
-  password?: string;
-  notes?: string;
-}
-
 export const UserModel = db.define('user', {
   firstName: {
       type: Sequelize.STRING,

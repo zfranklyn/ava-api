@@ -1,10 +1,6 @@
 import * as Sequelize from 'sequelize';
 import { db } from './../_db';
-
-export interface ITag {
-  text: string;
-  color: string;
-}
+import { Color } from './../sharedTypes';
 
 export const TagModel = db.define('tag', {
   text: {
@@ -14,6 +10,6 @@ export const TagModel = db.define('tag', {
   color: {
       type: Sequelize.STRING,
       allowNull: false,
-      defaultValue: '#137CBD',
+      defaultValue: Color.BLUE,
   },
 });

@@ -3,15 +3,19 @@
 const debug = require('debug')('debug/seed');
 
 import * as faker from 'faker';
-import * as UserModel from './models/user.model';
-import * as TaskModel from './models/task.model';
-import * as StudyModel from './models/study.model';
-import { UserRoleType } from './models';
+import {
+  UserModel,
+  TaskModel,
+  StudyModel,
+  TagModel,
+} from './models/index';
+import { UserRoleType, Color } from './sharedTypes';
+
 import { db } from './_db';
 
 export const seedDatabase = async () => {
   debug('Seeding Database');
-  await seedParticipants(5);
+  await seedParticipants(500);
   await seedResearchers();
   await seedStudies(3);
   await seedTasks(3);
@@ -22,14 +26,23 @@ const seedParticipants = async (num: number) => {
   debug(`Seeding ${num} Participants`);
   return new Promise ((resolve, reject) => {
     for (let n = 0; n < num; n++) {
-      UserModel.UserModel.create({
+      UserModel.create({
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
         email: faker.internet.email(),
         tel: faker.phone.phoneNumber(),
         userType: 'PARTICIPANT',
         userRole: faker.helpers.randomize(['TEACHER', 'ADMIN', 'STUDENT']) as UserRoleType,
-      });
+      })
+        .then((newParticipant: any) => {
+          TagModel.create({
+            text: 'Student',
+            color: Color.FOREST,
+          })
+            .then((newTag) => {
+              newParticipant.addTag(newTag);
+            });
+        });
     }
     resolve();
   });
@@ -38,7 +51,7 @@ const seedParticipants = async (num: number) => {
 const seedResearchers = async () => {
   debug(`Seeding Researchers`);
   return new Promise ((resolve, reject) => {
-    UserModel.UserModel.create({
+    UserModel.create({
       firstName: 'Franklyn',
       lastName: 'Zhu',
       email: 'zfranklyn@gmail.com',
@@ -48,7 +61,7 @@ const seedResearchers = async () => {
       username: 'zfranklyn',
       password: 'password',
     }).then(() => {
-      UserModel.UserModel.create({
+      UserModel.create({
         firstName: 'Daniel',
         lastName: 'Cordaro',
         email: 'dtcordaro@gmail.com',
@@ -65,26 +78,41 @@ const seedResearchers = async () => {
 const seedStudies = async (num: number) => {
   return new Promise ((resolve, reject) => {
     for (let n = 0; n < num; n++) {
-      StudyModel.StudyModel.create({
-        title: faker.lorem.words(3),
-        description: faker.lorem.sentences(2),
-        metadata: '{}',
+      StudyModel.create({
+        title: faker.helpers.randomize(['Corbett Prep Biweekly Study',
+                                        'Royal Academy Semester Survey',
+                                        'Yale Wellbeing Weekly Survey',
+                                        'Beijing Private School Survey',
+                                      ]),
+        description: faker.helpers.randomize([
+          'Survey measuring psychological wellbeing, educator burnout.',
+          'SMS survey designed to get baseline measurements.',
+          'Full email survey with complete battery of psychological tests',
+          'Survey announcement, introduction to the system',
+        ]),
+        metadata: '{surveyLink: "www.franklyn.xyz"}',
       })
       .then((newStudy: any) => {
         // assign administrators
-        UserModel.UserModel.findAll({
-        })
-        .then((allUsers: any[]) => {
-          const admins = allUsers.filter((user: any) => user.userType === 'RESEARCHER');
-          const participants = allUsers.filter((user: any) => user.userType === 'PARTICIPANT');
+        UserModel.findAll()
+          .then((allUsers: any[]) => {
+            const admins = allUsers.filter((user: any) => user.userType === 'RESEARCHER');
+            const participants = allUsers.filter((user: any) => user.userType === 'PARTICIPANT');
 
-          newStudy.setCreator(admins[0]);
-          newStudy.addUsers(participants);
+            newStudy.setCreator(admins[0]);
+            newStudy.addUsers(participants);
+          });
 
+        TagModel.create({
+          text: faker.helpers.randomize(['Bhutan', 'Corbett Prep', 'Yale University', 'New Haven', 'USA']),
+          color: Color.BLUE,
         })
-        .then(() => {
-          resolve();
-        });
+          .then((newTag) => {
+            newStudy.addTag(newTag);
+          })
+          .then(() => {
+            resolve();
+          });
       });
     }
   });
@@ -92,19 +120,20 @@ const seedStudies = async (num: number) => {
 
 const seedTasks = async (numTasks: number) => {
   return new Promise ((resolve, reject) => {
-    StudyModel.StudyModel.findAll()
+    StudyModel.findAll()
     .then((allStudies: any) => {
       // create N tasks for each study
       allStudies.map((study: any) => {
         for (let n = 0; n < numTasks; n++) {
-          TaskModel.TaskModel.create({
-            timestamp: new Date(),
-            type: 'SMS',
+          TaskModel.create({
+            scheduledTime: new Date(),
+            type: 'SURVEY',
+            medium: 'SMS',
             message: faker.lorem.sentences(2),
             completed: false,
           }).then((createdTask: any) => {
             debug('created task');
-            createdTask.setStudy(study);
+            study.addTask(createdTask);
           });
         }
       });

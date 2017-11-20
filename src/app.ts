@@ -3,7 +3,9 @@ import * as express from 'express';
 import * as logger from 'morgan';
 import * as path from 'path';
 
-import { UserRouter } from './routes';
+import {
+  MainRouter,
+} from './routes';
 
 const app: express.Application = express();
 
@@ -14,7 +16,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // API Routes
-app.use('/participants', UserRouter);
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
+app.use('/', MainRouter);
 
 // catch 404 and forward to error handler
 app.use((req: express.Request, res: express.Response, next: express.NextFunction): any => {

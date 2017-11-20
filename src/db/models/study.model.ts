@@ -1,12 +1,6 @@
 import * as Sequelize from 'sequelize';
 import { db } from './../_db';
 
-export interface IStudy {
-  title: string;
-  description: string;
-  metadata: string;
-}
-
 export const StudyModel = db.define('study', {
   title: {
       type: Sequelize.STRING,
@@ -20,5 +14,15 @@ export const StudyModel = db.define('study', {
       type: Sequelize.STRING,
       allowNull: false,
       defaultValue: '{}', // stringified JSON
+  },
+  active: {
+      type: Sequelize.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+  },
+  archived: {
+      type: Sequelize.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
   },
 });
