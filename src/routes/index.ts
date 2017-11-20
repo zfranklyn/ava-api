@@ -48,4 +48,6 @@ MainRouter.get('/messages', MessageController.getAllMessages);
 MainRouter.get('/messages/:userId', MessageController.getMessagesForUser);
 
 // Deletes specified message
-MainRouter.delete('/messages/:messageId', MessageController.deleteMessage);
+MainRouter.delete('/message/:messageId', MessageController.deleteMessage);
+MainRouter.post('/message/send', MessageController.sendMessage);
+MainRouter.post('/message/receive', MessageController.receiveMessage);

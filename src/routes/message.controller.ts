@@ -23,6 +23,7 @@ import {
 import { IMessage } from './../db/sharedTypes';
 
 export const getAllMessages = (req: Request, res: Response, next: NextFunction) => {
+  debug(`Get all messages`);
   MessageModel.findAll({})
     .then((allMessages) => {
       res.status(200);
@@ -51,6 +52,8 @@ export const getMessagesForUser = (req: Request, res: Response, next: NextFuncti
     });
   }
 
+  debug(`Getting messages for User ${userId}, start ${start}, end ${end}`);
+
   MessageModel.findAll(searchParams)
     .then((allMessages) => {
       res.status(200);
@@ -59,4 +62,33 @@ export const getMessagesForUser = (req: Request, res: Response, next: NextFuncti
     .catch((err: Error) => {
       res.status(500);
     });
-}
+};
+
+export const deleteMessage = (req: Request, res: Response, next: NextFunction) => {
+  const { messageId } = req.params;
+  debug(`Deleting message (ID: ${messageId})`);
+  MessageModel.destroy({
+    where: {
+      id: messageId,
+    },
+  })
+    .then(() =>  {
+      res.sendStatus(200);
+    })
+    .catch((err: Error) => {
+      res.sendStatus(400);
+    });
+};
+
+export const sendMessage = (req: Request, res: Response, next: NextFunction) => {
+  const { mediumType, messageType, recipientUserID } = req.query;
+  debug(`Create Message, ${mediumType}, ${messageType}, to ${recipientUserID}`);
+  res.sendStatus(501);
+};
+
+export const receiveMessage = (req: Request, res: Response, next: NextFunction) => {
+  const { mediumType, messageType, recipientUserID } = req.query;
+  const { message } = req.body;
+  debug(`Received Message`);
+  res.sendStatus(501);
+};
