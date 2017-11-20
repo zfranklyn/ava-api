@@ -20,4 +20,9 @@ export const StudyModel = db.define('study', {
       allowNull: true,
       defaultValue: false,
   },
+  archived: {
+      type: Sequelize.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+  },
 });
