@@ -3,7 +3,12 @@ import * as express from 'express';
 import * as logger from 'morgan';
 import * as path from 'path';
 
-import { UserRouter, StudyRouter } from './routes';
+import {
+  UserRouter,
+  StudyRouter,
+  TaskRouter,
+  MessageRouter,
+} from './routes';
 
 const app: express.Application = express();
 
@@ -19,8 +24,10 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
-app.use('/users', UserRouter);
-app.use('/studies', StudyRouter);
+app.use('/user', UserRouter);
+app.use('/study', StudyRouter);
+app.use('/task', TaskRouter);
+app.use('/message', MessageRouter);
 
 // catch 404 and forward to error handler
 app.use((req: express.Request, res: express.Response, next: express.NextFunction): any => {

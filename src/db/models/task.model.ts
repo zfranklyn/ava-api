@@ -3,7 +3,7 @@ import { db } from './../_db';
 import { MediumType } from './../sharedTypes';
 
 export const TaskModel = db.define('task', {
-  timestamp: {
+  scheduledTime: {
       type: Sequelize.TIME,
       allowNull: false,
   },

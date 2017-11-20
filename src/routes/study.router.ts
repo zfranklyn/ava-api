@@ -12,16 +12,24 @@ import {
 
 import { IStudy } from './../db/sharedTypes';
 
-StudyRouter.get('/', (req: any, res: any, next: any) => {
+// Gets truncated version of studies
+StudyRouter.get('/all', (req: any, res: any, next: any) => {
+  StudyModel.findAll()
+    .then((allStudies) => {
+      res.json(allStudies);
+    });
+});
+
+StudyRouter.get('/all/fullData', (req: any, res: any, next: any) => {
   StudyModel.findAll({
-    include: [TaskModel],
+    include: [TaskModel, UserModel],
   })
     .then((allStudies: any[]) => {
       res.json(allStudies);
     });
 });
 
-StudyRouter.get('/study/:id', (req: any, res: any, next: any) => {
+StudyRouter.get('/detail/:id', (req: any, res: any, next: any) => {
   const studyId = req.params.id;
   StudyModel.find({
     where: { id: studyId},
@@ -29,18 +37,6 @@ StudyRouter.get('/study/:id', (req: any, res: any, next: any) => {
   })
     .then((allStudies) => {
       res.json(allStudies);
-    });
-});
-
-StudyRouter.get('/active', (req: any, res: any, next: any) => {
-  StudyModel.findAll({
-    include: [{model: TaskModel}],
-    where: {
-      active: true,
-    },
-  })
-    .then((allActiveStudies: any[]) => {
-      res.json(allActiveStudies);
     });
 });
 

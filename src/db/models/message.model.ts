@@ -10,7 +10,7 @@ export const MessageModel = db.define('message', {
       type: Sequelize.ENUM('SURVEY', 'REMINDER', 'CUSTOM', 'REPLY'),
       allowNull: false,
   },
-  medium: {
+  mediumType: {
       type: Sequelize.ENUM('EMAIL', 'SMS', 'APP'),
       allowNull: false,
   },

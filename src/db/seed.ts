@@ -126,7 +126,7 @@ const seedTasks = async (numTasks: number) => {
       allStudies.map((study: any) => {
         for (let n = 0; n < numTasks; n++) {
           TaskModel.create({
-            timestamp: new Date(),
+            scheduledTime: new Date(),
             type: 'SURVEY',
             medium: 'SMS',
             message: faker.lorem.sentences(2),

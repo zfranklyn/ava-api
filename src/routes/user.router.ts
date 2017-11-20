@@ -10,9 +10,9 @@ import {
   TaskModel,
  } from '../db/models/index';
 
-UserRouter.get('/participants', (req: any, res: any, next: any) => {
-  const startIndex = req.query.startIndex;
-  const num = req.query.num;
+UserRouter.get('/', (req: any, res: any, next: any) => {
+  const startIndex = req.query.startIndex || 0;
+  const num = req.query.num || 50;
 
   UserModel.findAll({
     where: {
@@ -20,7 +20,7 @@ UserRouter.get('/participants', (req: any, res: any, next: any) => {
     },
   })
     .then((allUsers: any[]) => {
-      res.json(allUsers.slice((startIndex || 0), ((startIndex + num) || allUsers.length)));
+      res.json(allUsers.slice((startIndex), ((startIndex + num) || allUsers.length)));
     });
 });
 
