@@ -1,5 +1,5 @@
 // tslint:disable
-const debug = require('debug')('debug/task.router');
+const debug = require('debug')('debug/task.controller');
 let express = require('express');
 // tslint:enable
 
@@ -11,14 +11,29 @@ import {
  } from '../db/models/index';
 
 import {
+  Request,
+  Response,
+  NextFunction,
+} from 'express';
+
+import {
   ITask,
  } from './../db/sharedTypes';
 
-const TaskRouter = express.Router();
+export const getAllTasks = (req: Request, res: Response, next: NextFunction) => {
+  debug(`Getting all tasks in DB`);
 
-// get all tasks for a specific Study
-TaskRouter.get('/:id', (req: any, res: any, next: any) => {
-  const studyId = req.params.id;
+  TaskModel.findAll()
+    .then(res.json)
+    .catch((err: Error) => {
+      debug(err);
+      res.sendStatus(400);
+    });
+};
+
+export const getTasksForStudy = (req: Request, res: Response, next: NextFunction) => {
+  const { studyId } = req.params;
+  debug(`Getting all tasks for Study #${studyId}`);
 
   TaskModel.findAll({
     where: {
@@ -28,20 +43,46 @@ TaskRouter.get('/:id', (req: any, res: any, next: any) => {
   })
     .then((tasksFromStudy) => {
       res.json(tasksFromStudy);
+    })
+    .catch((err: Error) => {
+      debug(err);
+      res.sendStatus(500);
     });
-});
+};
 
-TaskRouter.post('/:id', (req: any, res: any, next: any) => {
-  const { timestamp, type, message, medium, studyId } = req.body;
-
-  TaskModel.create({
-    timestamp, type, message, medium,
-    completed: false,
-    studyId,
-  })
+export const createTaskForStudy = (req: Request, res: Response, next: NextFunction) => {
+  TaskModel.create(req.body)
     .then((createdTask) => {
       res.json(createdTask);
+    })
+    .catch((err: Error) => {
+      debug(err);
+      res.sendStatus(500);
     });
-});
+};
 
-export { TaskRouter };
+export const updateTask = (req: Request, res: Response, next: NextFunction) => {
+  const { taskId } = req.params;
+  TaskModel.find({
+    where: {
+      id: taskId,
+    },
+  })
+    .then((foundTask: any) => {
+      if (foundTask) {
+        foundTask.updateAttributes(req.body)
+        .then(res.json)
+        .catch((err: Error) => {
+          debug(err);
+          res.sendStatus(400);
+        });
+      } else {
+        debug(`Task does not exist`);
+        res.sendStatus(404);
+      }
+    })
+    .catch((err: Error) => {
+      debug(err);
+      res.sendStatus(500);
+    });
+};

@@ -49,7 +49,11 @@ export const getAllStudies = (req: Request, res: Response, next: NextFunction) =
 export const getStudy = (req: Request, res: Response, next: NextFunction) => {
   const { studyId } = req.params;
   const { detailed } = req.query;
-  let searchParams = {where: { id: studyId }};
+  let searchParams = {
+    where: {
+      id: studyId,
+    },
+  };
 
   // only include associations if specified
   if (detailed) {
@@ -111,11 +115,6 @@ export const deleteStudy = (req: Request, res: Response, next: NextFunction) => 
 
 export const updateStudy = (req: Request, res: Response, next: NextFunction) => {
   const { studyId } = req.params;
-  const {
-    title,
-    description,
-    metadata,
-  } = req.body;
 
   StudyModel.find({
     where: {
@@ -124,12 +123,9 @@ export const updateStudy = (req: Request, res: Response, next: NextFunction) => 
   })
     .then((foundStudy: any) => {
       if (foundStudy) {
-        return foundStudy.updateAttributes({
-          title, description, metadata,
-        });
+        return foundStudy.updateAttributes(req.body);
       } else {
         res.sendStatus(404);
-        next();
       }
 
     })
@@ -157,19 +153,8 @@ export const getStudyTasks = (req: Request, res: Response, next: NextFunction) =
 
 export const createStudyTask = (req: Request, res: Response, next: NextFunction) => {
   const { studyId } = req.params;
-  const {
-    scheduledTime,
-    type,
-    message,
-    medium,
-  } = req.body;
 
-  TaskModel.create({
-    scheduledTime,
-    type,
-    message,
-    medium,
-  })
+  TaskModel.create(req.body)
     .then((newlyCreatedTask) => {
       res.status(200);
       res.json(newlyCreatedTask);
@@ -181,7 +166,7 @@ export const createStudyTask = (req: Request, res: Response, next: NextFunction)
 
 export const updateStudyTask = (req: Request, res: Response, next: NextFunction) => {
   const { studyId, taskId } = req.params;
-  const { scheduledTime, type, message, medium, completed } = req.body;
+
   TaskModel.find({
     where: {
       id: taskId,
@@ -189,10 +174,7 @@ export const updateStudyTask = (req: Request, res: Response, next: NextFunction)
     },
   })
     .then((foundTask: any) => {
-      return foundTask.updateAttributes({
-        scheduledTime,
-        type, message, medium, completed,
-      });
+      return foundTask.updateAttributes(req.body);
     })
     .then((updatedTask: any) => {
       res.status(200);

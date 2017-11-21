@@ -29,14 +29,6 @@ export const UserModel = db.define('user', {
       type: Sequelize.ENUM('TEACHER', 'STUDENT', 'ADMIN', 'PARENT', 'OTHER'),
       allowNull: false,
   },
-  username: {
-      type: Sequelize.STRING,
-      allowNull: true,
-  },
-  password: {
-      type: Sequelize.STRING,
-      allowNull: true,
-  },
   notes: {
       type: Sequelize.TEXT,
       allowNull: true,

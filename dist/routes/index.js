@@ -14,6 +14,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = require("express");
 var MessageController = require("./message.controller");
 var StudyController = require("./study.controller");
+var UserController = require("./user.controller");
+var TaskController = require("./task.controller");
 exports.MainRouter = express_1.Router();
 /* STUDY ROUTES */
 // Gets a list of all studies, with minimal data
@@ -40,7 +42,7 @@ exports.MainRouter.delete('/study/:studyId/task/:taskId', StudyController.delete
 exports.MainRouter.get('/messages', MessageController.getAllMessages);
 // Gets all messages for specified user (?start NUM, ?end NUM)
 // Messages are retrieved with most recent at index 0
-exports.MainRouter.get('/messages/:userId', MessageController.getMessagesForUser);
+exports.MainRouter.get('/messages/user/:userId', MessageController.getMessagesForUser);
 // Deletes specified message
 exports.MainRouter.delete('/message/:messageId', MessageController.deleteMessage);
 // Sends message (via mediumType) and creates a Message Entry
@@ -48,3 +50,23 @@ exports.MainRouter.delete('/message/:messageId', MessageController.deleteMessage
 exports.MainRouter.post('/message/send', MessageController.sendMessage);
 // Receives a message (could be email, SMS), and creates a Message Entry
 exports.MainRouter.post('/message/receive/sms', MessageController.receiveSMS);
+/* USER ROUTES */
+// Get all users (but no associations)
+exports.MainRouter.get('/users', UserController.getAllUsers);
+// Get details (associations) for one specified user
+exports.MainRouter.get('/user/:userId', UserController.getUserDetails);
+// Create a new user, need: [firstName, lastName, email, userType, tel, userRole]
+exports.MainRouter.post('/user', UserController.createUser);
+// Delete specified user
+exports.MainRouter.delete('/user/:userId', UserController.deleteUser);
+// Update specified user data
+exports.MainRouter.put('/user/:userId', UserController.updateUser);
+/* TASK ROUTES */
+// Get all tasks in DB
+exports.MainRouter.get('/tasks', TaskController.getAllTasks);
+// Get all tasks from a specific Study (and all associations)
+exports.MainRouter.get('/tasks/study/:studyId', TaskController.getTasksForStudy);
+// Create a task for a specific study
+exports.MainRouter.post('/task/study/:studyId', TaskController.createTaskForStudy);
+// Update a task
+exports.MainRouter.post('/task/:taskId', TaskController.updateTask);
