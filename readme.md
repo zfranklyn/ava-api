@@ -1,6 +1,6 @@
 # AVA Database Schema
 
-The following notes outline the relational database schema for AVA's backend system. We'll use [Sequelize](http://docs.sequelizejs.com/), a Node.js ORM for RDBs, and host our Postgres DBs on Amazon Redshift. Supplementary NoSQL databases will use AWS DynamoDB.
+The following notes outline the relational database schema for AVA's backend system. We'll use [Sequelize](http://docs.sequelizejs.com/), a Node.js ORM for RDBs, and host our Postgres DBs on Amazon RDS. Supplementary NoSQL databases will use AWS DynamoDB.
 
 ### Studies
 User creates a study in order to schedule a survey for a group of participants. It represents one interaction with a group of people. 
@@ -25,7 +25,7 @@ Participants proactively go to a link, fill out a complete form.
 Participants text a number, and receive a custom link to a semi-completed form
 
 3. Manual Add
-User can add a participant manually into the system.
+User can add a participant manually into the system
 
 ### Send Messages
 
