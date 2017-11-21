@@ -46,8 +46,10 @@ MainRouter.get('/messages', MessageController.getAllMessages);
 // Gets all messages for specified user (?start NUM, ?end NUM)
 // Messages are retrieved with most recent at index 0
 MainRouter.get('/messages/:userId', MessageController.getMessagesForUser);
-
 // Deletes specified message
 MainRouter.delete('/message/:messageId', MessageController.deleteMessage);
+// Sends message (via mediumType) and creates a Message Entry
+// Message entries cannot be created by themselves; they are side-effects of sending messages
 MainRouter.post('/message/send', MessageController.sendMessage);
-MainRouter.post('/message/receive', MessageController.receiveMessage);
+// Receives a message (could be email, SMS), and creates a Message Entry
+MainRouter.post('/message/receive/sms', MessageController.receiveSMS);

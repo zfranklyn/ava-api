@@ -15,10 +15,10 @@ import { db } from './_db';
 
 export const seedDatabase = async () => {
   debug('Seeding Database');
-  await seedParticipants(500);
+  // await seedParticipants(500);
   await seedResearchers();
-  await seedStudies(3);
-  await seedTasks(3);
+  // await seedStudies(3);
+  // await seedTasks(3);
   debug('Seed Completed');
 };
 
@@ -55,23 +55,12 @@ const seedResearchers = async () => {
       firstName: 'Franklyn',
       lastName: 'Zhu',
       email: 'zfranklyn@gmail.com',
-      tel: '6509467649',
+      tel: '+16509467649',
       userType: 'RESEARCHER',
       userRole: 'ADMIN',
       username: 'zfranklyn',
       password: 'password',
-    }).then(() => {
-      UserModel.create({
-        firstName: 'Daniel',
-        lastName: 'Cordaro',
-        email: 'dtcordaro@gmail.com',
-        tel: '6509467649',
-        userRole: 'ADMIN',
-        userType: 'RESEARCHER',
-        username: 'dtcordaro',
-        password: 'password',
-      }).then(() => resolve());
-    });
+    }).then(() => resolve());
   });
 };
 

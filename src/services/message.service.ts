@@ -16,15 +16,28 @@ import {
   UserModel,
   TaskModel,
 } from './../db/models/index';
+import { TwimlResponse } from 'twilio';
 
 interface IEmailHelper {
   emailAddress: string;
+  userId: string;
   subject: string;
   content: string;
+  messageType: MessageType;
 }
 
 interface ISMSHelper {
   recipient: string;
+  content: string;
+  messageType: MessageType;
+  userId: string;
+}
+
+interface ICreateMessage {
+  userId: string;
+  studyId?: string | null;
+  mediumType: MessageMedium;
+  messageType: MessageType;
   content: string;
 }
 
@@ -46,12 +59,12 @@ class MessageService {
   /*
     Helper Function for sending SMS via Twilio
   */
-  private sendSMSHelper = (obj: ISMSHelper) => {
-    return this.twilioClient.messages.create({
+  public sendSMSHelper = (obj: ISMSHelper, callback: any) => {
+    this.twilioClient.messages.create({
       body: obj.content,
       to: obj.recipient,
       from: this.twilioNumber,
-    });
+    }, callback);
   }
 
   /*
@@ -59,7 +72,7 @@ class MessageService {
     Check out the docs here:
     http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SES.html
   */
-  public sendEmailHelper = (obj: IEmailHelper) => {
+  public sendEmailHelper = (obj: IEmailHelper, callback: any) => {
 
     // Parameter object to pass onto AWS API
     const params = {
@@ -90,15 +103,7 @@ class MessageService {
     };
 
     // Returns promise for sending email
-    return new Promise((resolve, reject) => {
-      this.SES.sendEmail(params, (err: Error, data: any) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
-      });
-    });
+    this.SES.sendEmail(params, callback);
   }
 
   /*
@@ -111,18 +116,21 @@ class MessageService {
   * what's the medium? (medium)
   * was this sent automatically, or manually? (messageType)
   */
-  private createMessage = (
-    userId: string,
-    studyId: string | null,
-    mediumType: MessageMedium,
-    messageType: MessageType,
-    content: string,
-  ) => {
+  public createMessage = (obj: ICreateMessage) => {
+    debug(`Creating Message Entry`);
+    debug(obj);
+    const { content, mediumType, messageType, userId } = obj;
     return MessageModel.create({
       content, mediumType, messageType,
-      userId, studyId,
+      userId,
     });
   }
+
+  public generateEmptyResponse = () => {
+    const twiml = new twilio.twiml.MessagingResponse();
+    return twiml.message();
+  }
+
 }
 
 export const messageService = new MessageService();
