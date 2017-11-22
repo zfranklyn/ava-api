@@ -9,7 +9,12 @@ import {
   StudyModel,
   TagModel,
 } from './models/index';
-import { UserRoleType, Color } from './sharedTypes';
+import {
+  UserRoleType,
+  Color,
+  ITaskAPI,
+  IStudyAPI,
+} from './sharedTypes';
 
 import { db } from './_db';
 
@@ -24,9 +29,9 @@ export const seedDatabase = async () => {
 
 const seedParticipants = async (num: number) => {
   debug(`Seeding ${num} Participants`);
-  return new Promise ((resolve, reject) => {
+  return new Promise ( async (resolve, reject) => {
     for (let n = 0; n < num; n++) {
-      UserModel.create({
+      await UserModel.create({
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
         email: faker.internet.email(),
@@ -109,19 +114,39 @@ const seedStudies = async (num: number) => {
 
 const seedTasks = async (numTasks: number) => {
   return new Promise ((resolve, reject) => {
+    debug(`Creating ${numTasks} Tasks`);
     StudyModel.findAll()
     .then((allStudies: any) => {
       // create N tasks for each study
-      allStudies.map((study: any) => {
+      allStudies.map(async (study: IStudyAPI) => {
         for (let n = 0; n < numTasks; n++) {
-          TaskModel.create({
+          await TaskModel.create({
             scheduledTime: new Date(),
             type: 'SURVEY',
-            medium: 'SMS',
+            mediumType: 'SMS',
             message: faker.lorem.sentences(2),
             completed: false,
-          }).then((createdTask: any) => {
-            debug('created task');
+          }).then(async (createdTask: ITaskAPI) => {
+            // debug('created task');
+            for (let m = 0; m < 3; m++) {
+              await TaskModel.create({
+                scheduledTime: new Date(),
+                type: 'REMINDER',
+                mediumType: 'SMS',
+                message: `Reminder Number ${m} for Survey ${createdTask.id}`,
+                completed: false,
+              })
+              .then((newReminder: ITaskAPI) => {
+                Promise.all([
+                  createdTask.addReminder(newReminder),
+                  createdTask.setParentSurveyTask(newReminder),
+                  study.addTask(newReminder),
+                ])
+                .then(() => {
+                  // debug(`Created and associated Reminder #${m + 1} for Task #${createdTask.id}`);
+                });
+              });
+            }
             study.addTask(createdTask);
           });
         }

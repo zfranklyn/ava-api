@@ -25,5 +25,7 @@ StudyModel.hasMany(TaskModel);
 TaskModel.belongsTo(StudyModel);
 TaskModel.hasOne(StatusModel, { as: 'SurveyStatus'});
 UserModel.hasMany(StatusModel, { as: 'SurveyStatus' });
+TaskModel.hasOne(TaskModel, { as: 'ParentSurveyTask'}); // reminders are associated with a Parent Survey
+TaskModel.hasMany(TaskModel, { as: 'Reminders'}); // reminders are associated with a Parent Survey
 
 export default db;

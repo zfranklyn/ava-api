@@ -19,6 +19,8 @@ import {
 import {
   ITask,
   ITaskAPI,
+  IStudyAPI,
+  TASK_TYPE,
  } from './../db/sharedTypes';
 
 export const getAllTasks = (req: Request, res: Response, next: NextFunction) => {
@@ -52,14 +54,52 @@ export const getTasksForStudy = (req: Request, res: Response, next: NextFunction
 };
 
 export const createTaskForStudy = (req: Request, res: Response, next: NextFunction) => {
-  TaskModel.create(req.body)
+  const { studyId } = req.params;
+  const { type, ParentSurveyTaskId } = req.body;
+
+  // Does the specified study exist?
+  StudyModel.findById(studyId)
+  .then((foundStudy: IStudyAPI | null) => {
+
+    if (!foundStudy) {
+      throw Error(`Study #${studyId} does not exist`);
+    }
+
+    TaskModel.create(req.body)
     .then((createdTask: ITaskAPI | null) => {
-      res.json(createdTask);
+
+      if (!createdTask) {
+        throw Error('Task could not be created');
+      }
+
+      // if this was a reminder, then associate it with the survey
+      if (type === TASK_TYPE.REMINDER) {
+        debug(`REMINDER, Survey #${foundStudy.id}`);
+        TaskModel.findById(ParentSurveyTaskId)
+        .then((parentSurveyTask: ITaskAPI | null) => {
+
+          // ensure that the parent survey we're associating with exists
+          if (!parentSurveyTask) {
+            throw Error(`Parent Survey Task ${ParentSurveyTaskId} does not exist`);
+          }
+
+          parentSurveyTask.addReminder(createdTask);
+          createdTask.setParentSurveyTask(parentSurveyTask);
+        });
+      }
+      foundStudy.addTask(createdTask);
+    })
+    .then(() => {
+      res.sendStatus(200);
     })
     .catch((err: Error) => {
       debug(err);
-      res.sendStatus(500);
+      res.status(400).json({error: err});
     });
+  })
+  .catch((err: Error) => {
+    res.status(400).json({error: err});
+  });
 };
 
 export const updateTask = (req: Request, res: Response, next: NextFunction) => {
@@ -85,5 +125,20 @@ export const updateTask = (req: Request, res: Response, next: NextFunction) => {
     .catch((err: Error) => {
       debug(err);
       res.sendStatus(500);
+    });
+};
+
+export const deleteTask = (req: Request, res: Response, next: NextFunction) => {
+  const { taskId } = req.params;
+  TaskModel.destroy({
+    where: {
+      id: taskId,
+    },
+  })
+    .then(() =>  {
+      res.sendStatus(200);
+    })
+    .catch((err: Error) => {
+      res.status(400).json({ error: err });
     });
 };

@@ -73,7 +73,9 @@ MainRouter.put('/user/:userId', UserController.updateUser);
 MainRouter.get('/tasks', TaskController.getAllTasks);
 // Get all tasks from a specific Study (and all associations)
 MainRouter.get('/tasks/study/:studyId', TaskController.getTasksForStudy);
-// Create a task for a specific study
+// Create a task for a specific study; must specify ParentSurveyTaskId if it is a REMINDER
 MainRouter.post('/task/study/:studyId', TaskController.createTaskForStudy);
 // Update a task
 MainRouter.post('/task/:taskId', TaskController.updateTask);
+// Delete a task
+MainRouter.delete('/task/:taskId', TaskController.deleteTask);
