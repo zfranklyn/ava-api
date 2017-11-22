@@ -14,6 +14,10 @@ import {
   TaskModel,
  } from '../db/models/index';
 
+import {
+  IUserAPI,
+} from '../db/sharedTypes';
+
 export const getAllUsers = (req: Request, res: Response, next: NextFunction) => {
   const { userId } = req.params;
   const { start, end } = req.query;
@@ -31,7 +35,7 @@ export const getAllUsers = (req: Request, res: Response, next: NextFunction) => 
   debug(`Getting all users, start: ${start}, end: ${end}`);
 
   UserModel.findAll(searchParams)
-    .then((allUsers) => {
+    .then((allUsers: IUserAPI[]) => {
       res.status(200);
       res.json(allUsers);
     })
@@ -51,7 +55,7 @@ export const getUserDetails = (req: Request, res: Response, next: NextFunction) 
       id: userId,
     },
   })
-    .then((foundUser: any) => {
+    .then((foundUser: IUserAPI | null) => {
       res.status(200);
       res.json(foundUser);
     })
@@ -68,12 +72,13 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
       tel: req.body.tel,
     },
   })
-  .then((foundUser) => {
+  .then((foundUser: IUserAPI | null) => {
     if (foundUser) {
-      res.sendStatus(409);
+      debug(`User with number ${req.body.tel} already exists`);
+      throw Error(`User with number ${req.body.tel} already exists`);
     } else {
       UserModel.create(req.body)
-      .then((newUser) => {
+      .then((newUser: IUserAPI | null) => {
         res.status(200);
         res.json(newUser);
       })
@@ -82,6 +87,9 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
         res.status(409).json({error: 'User with this number already exists'});
       });
     }
+  })
+  .catch((err: Error) => {
+    res.status(409).json({error: err});
   });
 };
 
@@ -108,11 +116,11 @@ export const updateUser = (req: Request, res: Response, next: NextFunction) => {
       id: userId,
     },
   })
-    .then((foundUser: any) => {
+    .then((foundUser: IUserAPI | null) => {
       if (foundUser) {
         return foundUser.updateAttributes(req.params);
       } else {
-        res.sendStatus(400);
+        throw Error('User does not exist');
       }
     })
     .then((updatedUser) => {
@@ -120,6 +128,6 @@ export const updateUser = (req: Request, res: Response, next: NextFunction) => {
     })
     .catch((err: Error) => {
       debug(err);
-      res.sendStatus(400);
+      res.status(400).json({error: err});
     });
 };

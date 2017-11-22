@@ -20,12 +20,19 @@ import {
   messageService,
 } from './../services';
 
-import { IMessage, MediumType, MEDIUM_TYPE, MESSAGE_MEDIUM } from './../db/sharedTypes';
+import {
+  IMessage,
+  IMessageAPI,
+  MediumType,
+  MEDIUM_TYPE,
+  MESSAGE_MEDIUM,
+  IUserAPI,
+} from './../db/sharedTypes';
 
 export const getAllMessages = (req: Request, res: Response, next: NextFunction) => {
   debug(`Get all messages`);
-  MessageModel.findAll({})
-    .then((allMessages) => {
+  MessageModel.findAll()
+    .then((allMessages: IMessageAPI[]) => {
       res.status(200);
       res.json(allMessages);
     })
@@ -55,7 +62,7 @@ export const getMessagesForUser = (req: Request, res: Response, next: NextFuncti
   debug(`Getting messages for User ${userId}, start ${start}, end ${end}`);
 
   MessageModel.findAll(searchParams)
-    .then((allMessages) => {
+    .then((allMessages: IMessageAPI[]) => {
       res.status(200);
       res.json(allMessages);
     })
@@ -172,7 +179,7 @@ export const receiveSMS = (req: Request, res: Response, next: NextFunction) => {
       tel: From,
     },
   })
-    .then((foundUser: any) => {
+    .then((foundUser: IUserAPI | null) => {
       if (foundUser) {
         debug(`Identified User: ${foundUser.id}`);
         messageService.createMessage({

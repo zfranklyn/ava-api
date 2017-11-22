@@ -1,7 +1,11 @@
 import * as Sequelize from 'sequelize';
 import { db } from './../_db';
+import {
+  IStudy,
+  IStudyAPI,
+} from './../sharedTypes';
 
-export const StudyModel = db.define('study', {
+export const StudyModel = db.define<IStudyAPI, any>('study', {
   title: {
       type: Sequelize.STRING,
       allowNull: false,

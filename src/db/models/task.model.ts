@@ -1,8 +1,12 @@
 import * as Sequelize from 'sequelize';
 import { db } from './../_db';
-import { MediumType } from './../sharedTypes';
+import {
+    ITaskAPI,
+    MediumType,
+    ITask,
+} from './../sharedTypes';
 
-export const TaskModel = db.define('task', {
+export const TaskModel = db.define<ITaskAPI, any>('task', {
   scheduledTime: {
       type: Sequelize.TIME,
       allowNull: false,
@@ -15,7 +19,7 @@ export const TaskModel = db.define('task', {
       type: Sequelize.TEXT,
       allowNull: true,
   },
-  medium: {
+  mediumType: {
       type: Sequelize.ENUM('EMAIL', 'SMS', 'APP'),
       allowNull: false,
   },

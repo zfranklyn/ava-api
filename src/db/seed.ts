@@ -15,10 +15,10 @@ import { db } from './_db';
 
 export const seedDatabase = async () => {
   debug('Seeding Database');
-  // await seedParticipants(500);
+  await seedParticipants(100);
   await seedResearchers();
-  // await seedStudies(3);
-  // await seedTasks(3);
+  await seedStudies(3);
+  await seedTasks(3);
   debug('Seed Completed');
 };
 

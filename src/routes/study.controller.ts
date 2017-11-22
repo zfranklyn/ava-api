@@ -15,7 +15,11 @@ import {
   UserModel,
 } from '../db/models/index';
 
-import { IStudy } from './../db/sharedTypes';
+import {
+  IStudy,
+  IStudyAPI,
+  ITaskAPI,
+} from './../db/sharedTypes';
 
 // Gets all studies in database, truncated data (for bulk display)
 export const getAllStudies = (req: Request, res: Response, next: NextFunction) => {
@@ -40,7 +44,7 @@ export const getAllStudies = (req: Request, res: Response, next: NextFunction) =
   }
 
   StudyModel.findAll(searchParams)
-    .then((allStudies) => {
+    .then((allStudies: IStudyAPI[]) => {
       res.json(allStudies);
     });
 };
@@ -66,7 +70,7 @@ export const getStudy = (req: Request, res: Response, next: NextFunction) => {
   }
 
   StudyModel.find(searchParams)
-    .then((study) => {
+    .then((study: IStudyAPI | null) => {
       res.status(200);
       res.json(study);
     })
@@ -89,7 +93,7 @@ export const createStudy = (req: Request, res: Response, next: NextFunction) => 
     metadata,
     active: false,
   })
-    .then((newStudy) => {
+    .then((newStudy: IStudyAPI | null) => {
       res.status(201);
       res.json(newStudy);
     })
@@ -121,7 +125,7 @@ export const updateStudy = (req: Request, res: Response, next: NextFunction) => 
       id: studyId,
     },
   })
-    .then((foundStudy: any) => {
+    .then((foundStudy: IStudyAPI | null) => {
       if (foundStudy) {
         return foundStudy.updateAttributes(req.body);
       } else {
@@ -142,7 +146,7 @@ export const getStudyTasks = (req: Request, res: Response, next: NextFunction) =
       studyId,
     },
   })
-    .then((foundTasks) => {
+    .then((foundTasks: ITaskAPI[]) => {
       res.status(200);
       res.json(foundTasks);
     })
@@ -155,7 +159,7 @@ export const createStudyTask = (req: Request, res: Response, next: NextFunction)
   const { studyId } = req.params;
 
   TaskModel.create(req.body)
-    .then((newlyCreatedTask) => {
+    .then((newlyCreatedTask: ITaskAPI | null) => {
       res.status(200);
       res.json(newlyCreatedTask);
     })
@@ -173,10 +177,10 @@ export const updateStudyTask = (req: Request, res: Response, next: NextFunction)
       studyId,
     },
   })
-    .then((foundTask: any) => {
+    .then((foundTask: ITaskAPI | null) => {
       return foundTask.updateAttributes(req.body);
     })
-    .then((updatedTask: any) => {
+    .then((updatedTask: ITaskAPI | null) => {
       res.status(200);
       res.json(updatedTask);
     })

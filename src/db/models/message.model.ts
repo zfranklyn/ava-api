@@ -1,7 +1,11 @@
 import * as Sequelize from 'sequelize';
 import { db } from './../_db';
+import {
+  IMessage,
+  IMessageAPI,
+} from './../sharedTypes';
 
-export const MessageModel = db.define('message', {
+export const MessageModel = db.define<IMessageAPI, any>('message', {
   content: {
       type: Sequelize.TEXT,
       allowNull: false,

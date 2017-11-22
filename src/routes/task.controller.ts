@@ -18,6 +18,7 @@ import {
 
 import {
   ITask,
+  ITaskAPI,
  } from './../db/sharedTypes';
 
 export const getAllTasks = (req: Request, res: Response, next: NextFunction) => {
@@ -41,7 +42,7 @@ export const getTasksForStudy = (req: Request, res: Response, next: NextFunction
     },
     include: [{model: StatusModel, as: 'SurveyStatus'}],
   })
-    .then((tasksFromStudy) => {
+    .then((tasksFromStudy: ITaskAPI[]) => {
       res.json(tasksFromStudy);
     })
     .catch((err: Error) => {
@@ -52,7 +53,7 @@ export const getTasksForStudy = (req: Request, res: Response, next: NextFunction
 
 export const createTaskForStudy = (req: Request, res: Response, next: NextFunction) => {
   TaskModel.create(req.body)
-    .then((createdTask) => {
+    .then((createdTask: ITaskAPI | null) => {
       res.json(createdTask);
     })
     .catch((err: Error) => {
@@ -68,7 +69,7 @@ export const updateTask = (req: Request, res: Response, next: NextFunction) => {
       id: taskId,
     },
   })
-    .then((foundTask: any) => {
+    .then((foundTask: ITaskAPI | null) => {
       if (foundTask) {
         foundTask.updateAttributes(req.body)
         .then(res.json)

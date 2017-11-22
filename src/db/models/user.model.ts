@@ -1,7 +1,11 @@
 import * as Sequelize from 'sequelize';
 import { db } from './../_db';
+import {
+  IUser,
+  IUserAPI,
+} from './../sharedTypes';
 
-export const UserModel = db.define('user', {
+export const UserModel = db.define<IUserAPI, any>('user', {
   firstName: {
       type: Sequelize.STRING,
       allowNull: false,
