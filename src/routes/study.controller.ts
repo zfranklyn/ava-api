@@ -125,7 +125,7 @@ export const updateStudy = (req: Request, res: Response, next: NextFunction) => 
       id: studyId,
     },
   })
-    .then((foundStudy: IStudyAPI | null) => {
+    .then((foundStudy: any | null) => {
       if (foundStudy) {
         return foundStudy.updateAttributes(req.body);
       } else {
@@ -177,7 +177,7 @@ export const updateStudyTask = (req: Request, res: Response, next: NextFunction)
       studyId,
     },
   })
-    .then((foundTask: ITaskAPI | null) => {
+    .then((foundTask: any | null) => {
       return foundTask.updateAttributes(req.body);
     })
     .then((updatedTask: ITaskAPI | null) => {

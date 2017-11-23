@@ -17,7 +17,7 @@ import {
 } from '../db/models/index';
 
 import {
-  messageService,
+  messageService, registrationService,
 } from './../services';
 
 import {
@@ -27,6 +27,7 @@ import {
   MEDIUM_TYPE,
   MESSAGE_MEDIUM,
   IUserAPI,
+  IStudyAPI,
 } from './../db/sharedTypes';
 
 export const getAllMessages = (req: Request, res: Response, next: NextFunction) => {
@@ -87,21 +88,45 @@ export const deleteMessage = (req: Request, res: Response, next: NextFunction) =
     });
 };
 
-export const sendMessage = (req: Request, res: Response, next: NextFunction) => {
-  const { mediumType, messageType, content, subject, userData } = req.body;
-  debug(`Create Message, ${mediumType}, ${messageType}, to ${userData.tel}`);
+export const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
+  let { mediumType, messageType, content, subject, userId, studyId } = req.body;
+  debug(`Create Message, ${mediumType}, ${messageType}, to ${userId}`);
+
+  let userData: any | null;
+  let studyData: any | null;
+  [ userData, studyData ] = await Promise.all([UserModel.findById(userId), StudyModel.findById(studyId)]);
+
+  if (!userData) {
+    debug(`User with ID ${userId} does not exist`);
+    res.send(404).json({error: `User with ID ${userId} does not exist`});
+    return;
+  }
+
+  if (studyData) {
+    const dataToInterpolate = Object.assign(
+                                {},
+                                JSON.parse(studyData.metadata),
+                                userData.dataValues,
+                                JSON.parse(userData.dataValues.metadata),
+                              );
+    try {
+      content = messageService.interpolateMessage(content, dataToInterpolate);
+    } catch (err) {
+      next(err);
+      return;
+    }
+  }
 
   switch (mediumType) {
     case MEDIUM_TYPE.SMS:
       messageService.sendSMSHelper({
-        messageType,
         content,
-        userId: userData.id,
         recipient: userData.tel,
       }, (err: Error, data: any) => {
         if (err) {
           debug(`ERROR, SMS not sent`);
-          res.sendStatus(400);
+          debug(err);
+          next(err);
         } else {
           debug(`SMS Sent`);
           messageService.createMessage({
@@ -114,9 +139,10 @@ export const sendMessage = (req: Request, res: Response, next: NextFunction) => 
               debug('Message Created');
               res.sendStatus(200);
             })
-            .catch(() => {
+            .catch((errorCreate: Error) => {
               debug('Message creation failed');
-              res.sendStatus(400);
+              debug(errorCreate);
+              next(errorCreate);
             });
         }
       });
@@ -149,7 +175,7 @@ export const sendMessage = (req: Request, res: Response, next: NextFunction) => 
             .catch((messageCreationError: Error) => {
               debug('Message creation failed');
               debug(messageCreationError);
-              res.sendStatus(400);
+              next(messageCreationError);
             });
         }
       });
@@ -173,6 +199,11 @@ export const receiveSMS = (req: Request, res: Response, next: NextFunction) => {
   const { From, Body, FromState, FromCity, FromCountry } = req.body;
   debug(`Received Message from ${From}`);
   debug(Body);
+
+  if (Body === 'REGISTER') {
+    registrationService.parseRegistrationMessage(Body, From);
+    return;
+  }
 
   UserModel.find({
     where: {

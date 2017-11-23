@@ -59,14 +59,14 @@ export const createTaskForStudy = (req: Request, res: Response, next: NextFuncti
 
   // Does the specified study exist?
   StudyModel.findById(studyId)
-  .then((foundStudy: IStudyAPI | null) => {
+  .then((foundStudy: any | null) => {
 
     if (!foundStudy) {
       throw Error(`Study #${studyId} does not exist`);
     }
 
     TaskModel.create(req.body)
-    .then((createdTask: ITaskAPI | null) => {
+    .then((createdTask: any | null) => {
 
       if (!createdTask) {
         throw Error('Task could not be created');
@@ -76,7 +76,7 @@ export const createTaskForStudy = (req: Request, res: Response, next: NextFuncti
       if (type === TASK_TYPE.REMINDER) {
         debug(`REMINDER, Survey #${foundStudy.id}`);
         TaskModel.findById(ParentSurveyTaskId)
-        .then((parentSurveyTask: ITaskAPI | null) => {
+        .then((parentSurveyTask: any | null) => {
 
           // ensure that the parent survey we're associating with exists
           if (!parentSurveyTask) {
@@ -109,7 +109,7 @@ export const updateTask = (req: Request, res: Response, next: NextFunction) => {
       id: taskId,
     },
   })
-    .then((foundTask: ITaskAPI | null) => {
+    .then((foundTask: any | null) => {
       if (foundTask) {
         foundTask.updateAttributes(req.body)
         .then(res.json)

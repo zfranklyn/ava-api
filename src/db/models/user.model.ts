@@ -37,4 +37,9 @@ export const UserModel = db.define<IUserAPI, any>('user', {
       type: Sequelize.TEXT,
       allowNull: true,
   },
+  metadata: {
+      type: Sequelize.TEXT,
+      allowNull: false,
+      defaultValue: '{}',
+  },
 });

@@ -1,9 +1,10 @@
 // tslint:disable
 const debug = require('debug')('debug/message.service');
+let twilio = require('twilio');
 // tslint:enable
-import * as twilio from 'twilio';
 import * as config from 'config';
 import * as AWS from 'aws-sdk';
+import * as _ from 'lodash';
 import {
   IMessage,
   ITask,
@@ -29,8 +30,6 @@ interface IEmailHelper {
 interface ISMSHelper {
   recipient: string;
   content: string;
-  messageType: MessageType;
-  userId: string;
 }
 
 interface ICreateMessage {
@@ -129,6 +128,19 @@ class MessageService {
   public generateEmptyResponse = () => {
     const twiml = new twilio.twiml.MessagingResponse();
     return twiml.message();
+  }
+
+  /*
+  Interpolation:
+  A message can have variables, filled in with Study and User data
+  We're using lodash for this:
+  https://lodash.com/docs/4.17.4#template
+  */
+  public interpolateMessage = (message: string, data: object) => {
+    debug(`Interpolating Data`);
+    debug(data);
+    const compiled = _.template(message);
+    return compiled(data);
   }
 
 }

@@ -41,7 +41,8 @@ export const getAllUsers = (req: Request, res: Response, next: NextFunction) => 
     })
     .catch((err: Error) => {
       debug(err);
-      res.sendStatus(400);
+      err.message = 'Could not get users';
+      next(err);
     });
 };
 
@@ -75,7 +76,7 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
   .then((foundUser: IUserAPI | null) => {
     if (foundUser) {
       debug(`User with number ${req.body.tel} already exists`);
-      throw Error(`User with number ${req.body.tel} already exists`);
+      throw new Error(`User with number ${req.body.tel} already exists`);
     } else {
       UserModel.create(req.body)
       .then((newUser: IUserAPI | null) => {
@@ -84,12 +85,12 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
       })
       .catch((err: Error) => {
         debug(err);
-        res.status(409).json({error: 'User with this number already exists'});
+        next(err);
       });
     }
   })
   .catch((err: Error) => {
-    res.status(409).json({error: err});
+    next(err);
   });
 };
 
@@ -104,21 +105,26 @@ export const deleteUser = (req: Request, res: Response, next: NextFunction) => {
     .then(() => res.sendStatus(200))
     .catch((err: Error) => {
       debug(err);
-      res.sendStatus(400);
+      next(err);
     });
 };
 
 export const updateUser = (req: Request, res: Response, next: NextFunction) => {
   const { userId } = req.params;
   debug(`Updating User ${userId}`);
+
+  // Stringify metadata, if exists
+  req.body.metadata = JSON.stringify(req.body.metadata);
+
   UserModel.find({
     where: {
       id: userId,
     },
   })
-    .then((foundUser: IUserAPI | null) => {
+    .then((foundUser: any | null) => {
       if (foundUser) {
-        return foundUser.updateAttributes(req.params);
+        debug(req.body);
+        return foundUser.updateAttributes(req.body);
       } else {
         throw Error('User does not exist');
       }
@@ -128,6 +134,6 @@ export const updateUser = (req: Request, res: Response, next: NextFunction) => {
     })
     .catch((err: Error) => {
       debug(err);
-      res.status(400).json({error: err});
+      next(err);
     });
 };

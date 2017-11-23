@@ -65,6 +65,7 @@ const seedResearchers = async () => {
       userRole: 'ADMIN',
       username: 'zfranklyn',
       password: 'password',
+      metadata: '{}',
     }).then(() => resolve());
   });
 };
@@ -84,7 +85,7 @@ const seedStudies = async (num: number) => {
           'Full email survey with complete battery of psychological tests',
           'Survey announcement, introduction to the system',
         ]),
-        metadata: '{surveyLink: "www.franklyn.xyz"}',
+        metadata: JSON.stringify({surveyLink: 'www.franklyn.xyz'}),
       })
       .then((newStudy: any) => {
         // assign administrators
@@ -118,7 +119,7 @@ const seedTasks = async (numTasks: number) => {
     StudyModel.findAll()
     .then((allStudies: any) => {
       // create N tasks for each study
-      allStudies.map(async (study: IStudyAPI) => {
+      allStudies.map(async (study: an) => {
         for (let n = 0; n < numTasks; n++) {
           await TaskModel.create({
             scheduledTime: new Date(),
@@ -126,17 +127,17 @@ const seedTasks = async (numTasks: number) => {
             mediumType: 'SMS',
             message: faker.lorem.sentences(2),
             completed: false,
-          }).then(async (createdTask: ITaskAPI) => {
+          }).then(async (createdTask: any) => {
             // debug('created task');
             for (let m = 0; m < 3; m++) {
-              await TaskModel.create({
+              TaskModel.create({
                 scheduledTime: new Date(),
                 type: 'REMINDER',
                 mediumType: 'SMS',
-                message: `Reminder Number ${m} for Survey ${createdTask.id}`,
+                message: `Reminder Number ${m + 1} for Survey ${createdTask.id}, Study ${study.id}`,
                 completed: false,
               })
-              .then((newReminder: ITaskAPI) => {
+              .then((newReminder: any) => {
                 Promise.all([
                   createdTask.addReminder(newReminder),
                   createdTask.setParentSurveyTask(newReminder),

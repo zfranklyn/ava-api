@@ -37,7 +37,7 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
 if (app.get('env') === 'development') {
   app.use((err: any, req: any, res: any, next: any) => {
     res.status(err.status || 500);
-    res.render('error', {
+    res.json({
       error: err,
       message: err.message,
     });
@@ -46,12 +46,12 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  res.status(err.status || 500);
-  res.render('error', {
-    error: {},
-    message: err.message,
-  });
-});
+// app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+//   res.status(err.status || 500);
+//   res.send({
+//     error: {},
+//     message: err.message,
+//   });
+// });
 
 export { app };
