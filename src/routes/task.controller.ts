@@ -142,3 +142,15 @@ export const deleteTask = (req: Request, res: Response, next: NextFunction) => {
       res.status(400).json({ error: err });
     });
 };
+
+export const completeTask = (req: Request, res: Response, next: NextFunction) => {
+  const { eventId } = req.query;
+  StatusModel.findById(eventId)
+    .then((status: any) => {
+      return status.updateAttributes({
+        completed: true,
+        completionTime: new Date(),
+      });
+    })
+    .then(() => res.sendStatus(200));
+};

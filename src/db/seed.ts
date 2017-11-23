@@ -119,7 +119,7 @@ const seedTasks = async (numTasks: number) => {
     StudyModel.findAll()
     .then((allStudies: any) => {
       // create N tasks for each study
-      allStudies.map(async (study: an) => {
+      allStudies.map(async (study: any) => {
         for (let n = 0; n < numTasks; n++) {
           await TaskModel.create({
             scheduledTime: new Date(),
@@ -129,6 +129,13 @@ const seedTasks = async (numTasks: number) => {
             completed: false,
           }).then(async (createdTask: any) => {
             // debug('created task');
+            // UserModel.findAll()
+            // .then((allUsers: any) => {
+            //   allUsers.map((user: any) => {
+            //     StatusModel.create()
+            //   })
+            // });
+
             for (let m = 0; m < 3; m++) {
               TaskModel.create({
                 scheduledTime: new Date(),

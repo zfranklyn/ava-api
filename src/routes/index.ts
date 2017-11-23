@@ -79,3 +79,5 @@ MainRouter.post('/task/study/:studyId', TaskController.createTaskForStudy);
 MainRouter.put('/task/:taskId', TaskController.updateTask);
 // Delete a task
 MainRouter.delete('/task/:taskId', TaskController.deleteTask);
+// Qualtrics endpoint for completing a survey task
+MainRouter.post('/task/complete', TaskController.completeTask);
