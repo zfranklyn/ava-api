@@ -12,11 +12,12 @@ import {
 export const StatusModel = db.define<IStatusAPI, any>('status', {
   completed: {
       type: Sequelize.BOOLEAN,
-      allowNull: false,
+      allowNull: true,
       defaultValue: false,
   },
   completionTime: {
       type: Sequelize.TIME,
-      allowNull: false,
+      allowNull: true,
+      defaultValue: null,
   },
 });

@@ -20,35 +20,35 @@ import {
 
 export const getAllUsers = (req: Request, res: Response, next: NextFunction) => {
   const { userId } = req.params;
-  const { start, end } = req.query;
+  const { start, limit } = req.query;
 
   let searchParams = {
     offset: (start) ? start : 0,
   };
 
-  if (end) {
+  if (limit) {
     searchParams = Object.assign({}, searchParams, {
-      limit: end,
+      limit,
     });
   }
 
-  debug(`Getting all users, start: ${start}, end: ${end}`);
+  debug(`Request: Getting all users, start: ${start}, limit: ${limit}`);
 
   UserModel.findAll(searchParams)
     .then((allUsers: IUserAPI[]) => {
-      res.status(200);
+      debug(`Success: retrieved and sending ${allUsers.length} users`);
       res.json(allUsers);
     })
     .catch((err: Error) => {
+      debug(`Failed: could not retrieve all users`);
       debug(err);
-      err.message = 'Could not get users';
       next(err);
     });
 };
 
 export const getUserDetails = (req: Request, res: Response, next: NextFunction) => {
   const { userId } = req.params;
-  debug(`Getting details for user ${userId}`);
+  debug(`Requst: retrieve all details for user ${userId}`);
 
   UserModel.find({
     include: [{all: true}, { model: StudyModel, include: [{model: TaskModel}]}],
@@ -57,17 +57,20 @@ export const getUserDetails = (req: Request, res: Response, next: NextFunction) 
     },
   })
     .then((foundUser: IUserAPI | null) => {
-      res.status(200);
+      debug(`Success: Retrieved details:`);
+      debug(foundUser);
       res.json(foundUser);
     })
     .catch((err: Error) => {
+      debug(`Failed: to retrieve all details for user ${userId}`);
       debug(err);
-      res.sendStatus(400);
+      next(err);
     });
 };
 
 export const createUser = (req: Request, res: Response, next: NextFunction) => {
   // Does this phone number already exist?
+  debug(`Request: create new user with number ${req.body.tel}`);
   UserModel.find({
     where: {
       tel: req.body.tel,
@@ -75,35 +78,42 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
   })
   .then((foundUser: IUserAPI | null) => {
     if (foundUser) {
-      debug(`User with number ${req.body.tel} already exists`);
-      throw new Error(`User with number ${req.body.tel} already exists`);
+      debug(`Failed: User with number ${req.body.tel} already exists`);
+      next(new Error(`User with number ${req.body.tel} already exists`));
     } else {
       UserModel.create(req.body)
-      .then((newUser: IUserAPI | null) => {
-        res.status(200);
+      .then((newUser: any) => {
+        debug(`Success: new user created:`);
+        debug(newUser);
         res.json(newUser);
       })
       .catch((err: Error) => {
+        debug(`Failed: new user could not be created`);
         debug(err);
         next(err);
       });
     }
   })
   .catch((err: Error) => {
+    debug(err);
     next(err);
   });
 };
 
 export const deleteUser = (req: Request, res: Response, next: NextFunction) => {
   const { userId } = req.params;
-  debug(`Deleting User ${userId}`);
+  debug(`Request: delete User #${userId}`);
   UserModel.destroy({
     where: {
       id: userId,
     },
   })
-    .then(() => res.sendStatus(200))
+    .then(() => {
+      debug(`Success: deleted User #${userId}`);
+      res.sendStatus(200);
+    })
     .catch((err: Error) => {
+      debug(`Failed: User #${userId} could not be deleted`);
       debug(err);
       next(err);
     });
@@ -111,7 +121,8 @@ export const deleteUser = (req: Request, res: Response, next: NextFunction) => {
 
 export const updateUser = (req: Request, res: Response, next: NextFunction) => {
   const { userId } = req.params;
-  debug(`Updating User ${userId}`);
+  debug(`Request: update User #${userId} with following data:`);
+  debug(req.body);
 
   // Stringify metadata, if exists
   req.body.metadata = JSON.stringify(req.body.metadata);
@@ -123,14 +134,22 @@ export const updateUser = (req: Request, res: Response, next: NextFunction) => {
   })
     .then((foundUser: any | null) => {
       if (foundUser) {
-        debug(req.body);
-        return foundUser.updateAttributes(req.body);
+        debug(`\tPrevious User:`);
+        debug(`\t${foundUser}`);
+        foundUser.updateAttributes(req.body)
+        .then((updatedUser: any) => {
+          debug(`Success: User #${userId} has been updated`);
+          res.json(updatedUser);
+        })
+        .catch((err: Error) => {
+          debug(`Failed: User #${userId} could not be updated`);
+          debug(err);
+          next(err);
+        });
       } else {
-        throw Error('User does not exist');
+        debug(`Failed: User #${userId} does not exist`);
+        next(new Error(`User #${userId} does not exist`));
       }
-    })
-    .then((updatedUser) => {
-      res.json(updatedUser);
     })
     .catch((err: Error) => {
       debug(err);

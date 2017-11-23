@@ -24,19 +24,23 @@ import {
  } from './../db/sharedTypes';
 
 export const getAllTasks = (req: Request, res: Response, next: NextFunction) => {
-  debug(`Getting all tasks in DB`);
+  debug(`Request: retrieve all tasks in DB`);
 
   TaskModel.findAll()
-    .then(res.json)
+    .then((allTasks: any[]) => {
+      debug(`Success: retrieved and sending all ${allTasks.length} tasks in DB`);
+      res.json(allTasks);
+    })
     .catch((err: Error) => {
+      debug(`Failed: could not retrieve all tasks in DB`);
       debug(err);
-      res.sendStatus(400);
+      next(err);
     });
 };
 
 export const getTasksForStudy = (req: Request, res: Response, next: NextFunction) => {
   const { studyId } = req.params;
-  debug(`Getting all tasks for Study #${studyId}`);
+  debug(`Request: retrieve all tasks for Study #${studyId}`);
 
   TaskModel.findAll({
     where: {
@@ -45,65 +49,86 @@ export const getTasksForStudy = (req: Request, res: Response, next: NextFunction
     include: [{model: StatusModel, as: 'SurveyStatus'}],
   })
     .then((tasksFromStudy: ITaskAPI[]) => {
+      debug(`Success: retrieved all ${tasksFromStudy.length} tasks for Study #${studyId}`);
       res.json(tasksFromStudy);
     })
     .catch((err: Error) => {
+      debug(`Failed: could not retrieve tasks for Study #${studyId}`);
       debug(err);
-      res.sendStatus(500);
+      next(err);
     });
 };
 
-export const createTaskForStudy = (req: Request, res: Response, next: NextFunction) => {
+export const createTaskForStudy = async (req: Request, res: Response, next: NextFunction) => {
   const { studyId } = req.params;
   const { type, ParentSurveyTaskId } = req.body;
+  debug(`
+    Request: create new task for Study #${studyId}
+      type: ${type}
+      ParentSurveyTaskId: ${ParentSurveyTaskId || 'NA'}
+      ${req.body}
+  `);
 
   // Does the specified study exist?
   StudyModel.findById(studyId)
   .then((foundStudy: any | null) => {
 
     if (!foundStudy) {
-      throw Error(`Study #${studyId} does not exist`);
+      debug(`Failed: Study #${studyId} does not exist`);
+      next(new Error(`Study #${studyId} does not exist`));
     }
 
     TaskModel.create(req.body)
-    .then((createdTask: any | null) => {
-
-      if (!createdTask) {
-        throw Error('Task could not be created');
-      }
-
+    .then((createdTask: any) => {
       // if this was a reminder, then associate it with the survey
       if (type === TASK_TYPE.REMINDER) {
-        debug(`REMINDER, Survey #${foundStudy.id}`);
+        debug(`Attempting to create Reminder for parent task #${ParentSurveyTaskId}`);
         TaskModel.findById(ParentSurveyTaskId)
         .then((parentSurveyTask: any | null) => {
 
           // ensure that the parent survey we're associating with exists
           if (!parentSurveyTask) {
-            throw Error(`Parent Survey Task ${ParentSurveyTaskId} does not exist`);
+            debug(`Failed: Parent task for reminder does not exist`);
+            next(new Error(`Parent Survey Task ${ParentSurveyTaskId} does not exist`));
+          } else if (parentSurveyTask.dataValues.messageType !== TASK_TYPE.SURVEY) {
+            debug(`Failed: Parent survey task is not a survey`);
+            next(new Error(`Parent survey task for reminder is not a survey`));
+          } else {
+            Promise.all([parentSurveyTask.addReminder(createdTask),
+              createdTask.setParentSurveyTask(parentSurveyTask)])
+              .then(() => {
+                foundStudy.addTask(createdTask)
+                .then(() => {
+                  debug(`Success: created reminder associated with survey Task #${parentSurveyTask.id}`);
+                  res.json(createdTask);
+                })
+                .catch((err: Error) => {
+                  debug(`Failed: could not associate task with survey`);
+                  next(err);
+                });
+              })
+              .catch((err: Error) => {
+                debug(`Failed: could not create reminder`);
+                debug(err);
+                next(err);
+              });
           }
-
-          parentSurveyTask.addReminder(createdTask);
-          createdTask.setParentSurveyTask(parentSurveyTask);
         });
       }
-      foundStudy.addTask(createdTask);
-    })
-    .then(() => {
-      res.sendStatus(200);
     })
     .catch((err: Error) => {
       debug(err);
-      res.status(400).json({error: err});
+      next(err);
     });
   })
   .catch((err: Error) => {
-    res.status(400).json({error: err});
+    next(err);
   });
 };
 
 export const updateTask = (req: Request, res: Response, next: NextFunction) => {
   const { taskId } = req.params;
+  debug(`Request: update task #${taskId}`);
   TaskModel.find({
     where: {
       id: taskId,
@@ -112,45 +137,56 @@ export const updateTask = (req: Request, res: Response, next: NextFunction) => {
     .then((foundTask: any | null) => {
       if (foundTask) {
         foundTask.updateAttributes(req.body)
-        .then(res.json)
+        .then((updatedTask: any) => {
+          debug(`Success: task updated`);
+          res.json(updatedTask);
+        })
         .catch((err: Error) => {
+          debug(`Failed: task could not be updated`);
           debug(err);
-          res.sendStatus(400);
+          next(err);
         });
       } else {
-        debug(`Task does not exist`);
-        res.sendStatus(404);
+        debug(`Failed: Task #${taskId} does not exist`);
+        next(new Error(`Task #${taskId} does not exist`));
       }
     })
     .catch((err: Error) => {
       debug(err);
-      res.sendStatus(500);
+      next(err);
     });
 };
 
 export const deleteTask = (req: Request, res: Response, next: NextFunction) => {
   const { taskId } = req.params;
+  debug(`Request: delete task #${taskId}`);
   TaskModel.destroy({
     where: {
       id: taskId,
     },
   })
     .then(() =>  {
+      debug(`Success: task #${taskId} has been deleted`);
       res.sendStatus(200);
     })
     .catch((err: Error) => {
-      res.status(400).json({ error: err });
+      next(err);
     });
 };
 
-export const completeTask = (req: Request, res: Response, next: NextFunction) => {
-  const { eventId } = req.query;
-  StatusModel.findById(eventId)
-    .then((status: any) => {
-      return status.updateAttributes({
-        completed: true,
-        completionTime: new Date(),
-      });
-    })
-    .then(() => res.sendStatus(200));
+// This process can also be written 'asynchronously' with `async` and `await`
+export const getStatuses = async (req: Request, res: Response, next: NextFunction) => {
+  const { taskId } = req.params;
+  debug(`Request: retrieve all statuses associated with Task #${taskId}`);
+  const task: any = await TaskModel.findById(taskId);
+  if (task) {
+    let surveyStatuses: any[] = await task.getSurveyStatus();
+    surveyStatuses = surveyStatuses.map((d: any) => d.dataValues);
+    debug(`Success: sending all ${surveyStatuses.length} statuses associated with Task #${taskId}`);
+    res.json(surveyStatuses);
+  } else {
+    const newError = new Error(`Task with ID #${taskId} not found`);
+    debug(newError);
+    next(newError);
+  }
 };

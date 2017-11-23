@@ -31,20 +31,21 @@ import {
 } from './../db/sharedTypes';
 
 export const getAllMessages = (req: Request, res: Response, next: NextFunction) => {
-  debug(`Get all messages`);
+  debug(`Request: get all messages in database`);
   MessageModel.findAll()
     .then((allMessages: IMessageAPI[]) => {
-      res.status(200);
+      debug(`Success: retrieved and sending ${allMessages.length} messages in database`);
       res.json(allMessages);
     })
     .catch((err: Error) => {
-      res.sendStatus(500);
+      debug(err);
+      next(err);
     });
 };
 
 export const getMessagesForUser = (req: Request, res: Response, next: NextFunction) => {
   const { userId } = req.params;
-  const { start, end } = req.query;
+  const { start, limit } = req.query;
 
   let searchParams = {
     where: {
@@ -54,69 +55,80 @@ export const getMessagesForUser = (req: Request, res: Response, next: NextFuncti
     limit: 10, // Default, get 10 messages from start
   };
 
-  if (end) {
+  if (limit) {
     searchParams = Object.assign({}, searchParams, {
-      limit: end,
+      limit,
     });
   }
 
-  debug(`Getting messages for User ${userId}, start ${start}, end ${end}`);
+  debug(`Request: retrieve messages for User #${userId}, startIndex: ${start}, limit: ${limit}`);
 
   MessageModel.findAll(searchParams)
     .then((allMessages: IMessageAPI[]) => {
-      res.status(200);
+      debug(`Success: retrieved and sending ${allMessages.length} messages`);
       res.json(allMessages);
     })
     .catch((err: Error) => {
-      res.status(500);
+      debug(err);
+      next(err);
     });
 };
 
 export const deleteMessage = (req: Request, res: Response, next: NextFunction) => {
   const { messageId } = req.params;
-  debug(`Deleting message (ID: ${messageId})`);
+  debug(`Request: delete message ${messageId}`);
   MessageModel.destroy({
     where: {
       id: messageId,
     },
   })
-    .then(() =>  {
+    .then((deletedMessage: any) =>  {
+      debug(`Success: message ${messageId} deleted`);
       res.sendStatus(200);
     })
     .catch((err: Error) => {
-      res.sendStatus(400);
+      debug(err);
+      next(err);
     });
 };
 
 export const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
   let { mediumType, messageType, content, subject, userId, studyId } = req.body;
-  debug(`Create Message, ${mediumType}, ${messageType}, to ${userId}`);
+  debug(`
+    Request: create new message:
+      mediumType: ${mediumType}
+      messageType: ${messageType}
+      studyId: ${studyId}
+      recipient userId:${userId}
+      subject:${subject}
+      content: ${content}`);
 
   let userData: any | null;
   let studyData: any | null;
   [ userData, studyData ] = await Promise.all([UserModel.findById(userId), StudyModel.findById(studyId)]);
 
   if (!userData) {
-    debug(`User with ID ${userId} does not exist`);
-    res.send(404).json({error: `User with ID ${userId} does not exist`});
+    debug(`Failed: Recipient User #${userId} does not exist`);
+    next(new Error(`Failed: Recipient User #${userId} does not exist`));
+  }
+
+  const dataToInterpolate = Object.assign(
+                              {},
+                              (studyData) ? JSON.parse(studyData.metadata) : {}, // only if studyData exists
+                              userData.dataValues,
+                              JSON.parse(userData.dataValues.metadata),
+                            );
+  try {
+    content = messageService.interpolateMessage(content, dataToInterpolate);
+    debug(`Interpolated message:`);
+    debug(`${content}`);
+  } catch (err) {
+    debug(err);
+    next(err);
     return;
   }
 
-  if (studyData) {
-    const dataToInterpolate = Object.assign(
-                                {},
-                                JSON.parse(studyData.metadata),
-                                userData.dataValues,
-                                JSON.parse(userData.dataValues.metadata),
-                              );
-    try {
-      content = messageService.interpolateMessage(content, dataToInterpolate);
-    } catch (err) {
-      next(err);
-      return;
-    }
-  }
-
+  debug('Sending message:');
   switch (mediumType) {
     case MEDIUM_TYPE.SMS:
       messageService.sendSMSHelper({
@@ -124,11 +136,11 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
         recipient: userData.tel,
       }, (err: Error, data: any) => {
         if (err) {
-          debug(`ERROR, SMS not sent`);
+          debug(`Failed: SMS failed to send`);
           debug(err);
           next(err);
         } else {
-          debug(`SMS Sent`);
+          debug(`Success: SMS Sent`);
           messageService.createMessage({
             content,
             mediumType: MESSAGE_MEDIUM.SMS as MediumType,
@@ -136,11 +148,11 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
             userId: userData.id,
           })
             .then(() => {
-              debug('Message Created');
+              debug('Success: message record created');
               res.sendStatus(200);
             })
             .catch((errorCreate: Error) => {
-              debug('Message creation failed');
+              debug('Failed: message record creation failed');
               debug(errorCreate);
               next(errorCreate);
             });
@@ -156,11 +168,11 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
         emailAddress: userData.email,
       }, (err: Error, data: any) => {
         if (err) {
-          debug(`ERROR, email not sent`);
+          debug(`Failed: email failed to send`);
           debug(err);
           res.sendStatus(400);
         } else {
-          debug(`SMS Sent`);
+          debug(`Success: email sent`);
           debug(data);
           messageService.createMessage({
             content,
@@ -169,11 +181,11 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
             userId: userData.id,
           })
             .then(() => {
-              debug('Message Created');
+              debug('Success: message record created');
               res.sendStatus(200);
             })
             .catch((messageCreationError: Error) => {
-              debug('Message creation failed');
+              debug('Success: message record created');
               debug(messageCreationError);
               next(messageCreationError);
             });
@@ -181,26 +193,25 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
       });
       break;
     case MEDIUM_TYPE.APP:
-      debug(`Sending APP Message`);
+      debug(`UNIMPLEMENTED: sending APP message`);
       res.sendStatus(501);
-      next();
       break;
     default:
       debug(`Default`);
       res.sendStatus(501);
-      next();
       break;
   }
 };
 
 export const receiveSMS = (req: Request, res: Response, next: NextFunction) => {
-  // const { mediumType, messageType, content, userId } = req.body;
-  // const { message } = req.body;
   const { From, Body, FromState, FromCity, FromCountry } = req.body;
-  debug(`Received Message from ${From}`);
-  debug(Body);
+  debug(`
+    Received Message:
+      From: ${From}
+      Body: ${Body}`);
 
   if (Body === 'REGISTER') {
+    debug(`Attempting Registration Process for number ${From}`);
     registrationService.parseRegistrationMessage(Body, From);
     return;
   }
@@ -218,6 +229,13 @@ export const receiveSMS = (req: Request, res: Response, next: NextFunction) => {
           mediumType: 'SMS',
           messageType: 'REPLY',
           userId: foundUser.id,
+        })
+        .then((createdMessage: any) => {
+          debug(`Success: created message record for recieved SMS`);
+        })
+        .catch((err: Error) => {
+          debug(err);
+          next(err);
         });
 
         // Respond with empty message to prevent Twilio error
@@ -225,7 +243,7 @@ export const receiveSMS = (req: Request, res: Response, next: NextFunction) => {
         res.writeHead(200, {'Content-Type': 'text/json'});
         res.end(twiml.toString());
       } else {
-        debug(`Unidentified User`);
+        debug(`Error: unidentified user`);
         const twiml = messageService.generateEmptyResponse();
         res.writeHead(200, {'Content-Type': 'text/json'});
         res.end(twiml.toString());

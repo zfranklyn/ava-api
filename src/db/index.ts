@@ -23,8 +23,7 @@ StudyModel.belongsTo(UserModel, {as: 'Creator'});
 // tasks
 StudyModel.hasMany(TaskModel, { onDelete: 'cascade'});
 TaskModel.belongsTo(StudyModel);
-TaskModel.hasOne(StatusModel, { as: 'SurveyStatus', onDelete: 'cascade'});
-StatusModel.hasOne(UserModel);
+TaskModel.hasMany(StatusModel, { as: 'SurveyStatus', onDelete: 'cascade'});
 UserModel.hasMany(StatusModel, { as: 'SurveyStatus', onDelete: 'cascade' });
 TaskModel.hasOne(TaskModel, { // reminders are associated with a Parent Survey
   as: 'ParentSurveyTask',

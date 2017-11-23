@@ -8,6 +8,7 @@ import {
   TaskModel,
   StudyModel,
   TagModel,
+  StatusModel,
 } from './models/index';
 import {
   UserRoleType,
@@ -128,13 +129,18 @@ const seedTasks = async (numTasks: number) => {
             message: faker.lorem.sentences(2),
             completed: false,
           }).then(async (createdTask: any) => {
-            // debug('created task');
-            // UserModel.findAll()
-            // .then((allUsers: any) => {
-            //   allUsers.map((user: any) => {
-            //     StatusModel.create()
-            //   })
-            // });
+            // Create events for each task
+            UserModel.findAll()
+            .then((allUsers: any) => {
+              debug(`Creating statuses for ${allStudies.length * numTasks} Surveys & ${allUsers.length} Users`);
+              allUsers.map((user: any) => {
+                StatusModel.create()
+                .then((createdStatus: any) => {
+                  user.addSurveyStatus(createdStatus);
+                  createdTask.setSurveyStatus(createdStatus);
+                });
+              });
+            });
 
             for (let m = 0; m < 3; m++) {
               TaskModel.create({

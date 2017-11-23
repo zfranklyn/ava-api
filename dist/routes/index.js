@@ -16,15 +16,16 @@ var MessageController = require("./message.controller");
 var StudyController = require("./study.controller");
 var UserController = require("./user.controller");
 var TaskController = require("./task.controller");
+var ActionController = require("./action.controller");
 exports.MainRouter = express_1.Router();
 /* STUDY ROUTES */
 // Gets a list of all studies, with minimal data
-// 'archived': whether should display archieved studies as well
-// 'detailed': whether should also fetch associations
+// ?includeArchived=true&detailed=false
 exports.MainRouter.get('/studies', StudyController.getAllStudies);
-// Gets all data for a specified study (?detailed BOOL, ?archived BOOL)
+// Gets all data for a specified study
+// ?associations=true
 exports.MainRouter.get('/study/:studyId', StudyController.getStudy);
-// Deletes all data for a specified study (?detailed BOOL)
+// Deletes all data for a specified study
 exports.MainRouter.delete('/study/:studyId', StudyController.deleteStudy);
 // Creates a study
 exports.MainRouter.post('/study/create', StudyController.createStudy);
@@ -40,8 +41,8 @@ exports.MainRouter.put('/study/:studyId/task/:taskId', StudyController.updateStu
 exports.MainRouter.delete('/study/:studyId/task/:taskId', StudyController.deleteStudyTask);
 /* MESSAGE ROUTES */
 exports.MainRouter.get('/messages', MessageController.getAllMessages);
-// Gets all messages for specified user (?start NUM, ?end NUM)
-// Messages are retrieved with most recent at index 0
+// Gets all messages for specified user
+// ?start=0&limit=10
 exports.MainRouter.get('/messages/user/:userId', MessageController.getMessagesForUser);
 // Deletes specified message
 exports.MainRouter.delete('/message/:messageId', MessageController.deleteMessage);
@@ -52,6 +53,7 @@ exports.MainRouter.post('/message/send', MessageController.sendMessage);
 exports.MainRouter.post('/message/receive/sms', MessageController.receiveSMS);
 /* USER ROUTES */
 // Get all users (but no associations)
+// ?start=0&limit=10
 exports.MainRouter.get('/users', UserController.getAllUsers);
 // Get details (associations) for one specified user
 exports.MainRouter.get('/user/:userId', UserController.getUserDetails);
@@ -72,3 +74,12 @@ exports.MainRouter.post('/task/study/:studyId', TaskController.createTaskForStud
 exports.MainRouter.put('/task/:taskId', TaskController.updateTask);
 // Delete a task
 exports.MainRouter.delete('/task/:taskId', TaskController.deleteTask);
+// Get Task Statuses
+exports.MainRouter.get('/task/:taskId/statuses', TaskController.getStatuses);
+/* ACTIONS */
+// Adds association between a user and a study
+exports.MainRouter.post('/actions/addUserToStudy', ActionController.addUserToStudy);
+// Removes association between user and a study
+exports.MainRouter.post('/actions/removeUserFromStudy', ActionController.removeUserFromStudy);
+// Qualtrics endpoint for completing a survey task
+exports.MainRouter.post('/actions/event/complete', ActionController.completeEvent);

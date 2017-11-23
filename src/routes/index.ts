@@ -18,17 +18,18 @@ import * as MessageController from './message.controller';
 import * as StudyController from './study.controller';
 import * as UserController from './user.controller';
 import * as TaskController from './task.controller';
+import * as ActionController from './action.controller';
 
 export const MainRouter = Router();
 
 /* STUDY ROUTES */
 // Gets a list of all studies, with minimal data
-  // 'archived': whether should display archieved studies as well
-  // 'detailed': whether should also fetch associations
+// ?includeArchived=true&detailed=false
 MainRouter.get('/studies', StudyController.getAllStudies);
-// Gets all data for a specified study (?detailed BOOL, ?archived BOOL)
+// Gets all data for a specified study
+// ?associations=true
 MainRouter.get('/study/:studyId', StudyController.getStudy);
-// Deletes all data for a specified study (?detailed BOOL)
+// Deletes all data for a specified study
 MainRouter.delete('/study/:studyId', StudyController.deleteStudy);
 // Creates a study
 MainRouter.post('/study/create', StudyController.createStudy);
@@ -45,8 +46,8 @@ MainRouter.delete('/study/:studyId/task/:taskId', StudyController.deleteStudyTas
 
 /* MESSAGE ROUTES */
 MainRouter.get('/messages', MessageController.getAllMessages);
-// Gets all messages for specified user (?start NUM, ?end NUM)
-// Messages are retrieved with most recent at index 0
+// Gets all messages for specified user
+// ?start=0&limit=10
 MainRouter.get('/messages/user/:userId', MessageController.getMessagesForUser);
 // Deletes specified message
 MainRouter.delete('/message/:messageId', MessageController.deleteMessage);
@@ -58,6 +59,7 @@ MainRouter.post('/message/receive/sms', MessageController.receiveSMS);
 
 /* USER ROUTES */
 // Get all users (but no associations)
+// ?start=0&limit=10
 MainRouter.get('/users', UserController.getAllUsers);
 // Get details (associations) for one specified user
 MainRouter.get('/user/:userId', UserController.getUserDetails);
@@ -79,5 +81,13 @@ MainRouter.post('/task/study/:studyId', TaskController.createTaskForStudy);
 MainRouter.put('/task/:taskId', TaskController.updateTask);
 // Delete a task
 MainRouter.delete('/task/:taskId', TaskController.deleteTask);
+// Get Task Statuses
+MainRouter.get('/task/:taskId/statuses', TaskController.getStatuses);
+
+/* ACTIONS */
+// Adds association between a user and a study
+MainRouter.post('/actions/addUserToStudy', ActionController.addUserToStudy);
+// Removes association between user and a study
+MainRouter.post('/actions/removeUserFromStudy', ActionController.removeUserFromStudy);
 // Qualtrics endpoint for completing a survey task
-MainRouter.post('/task/complete', TaskController.completeTask);
+MainRouter.post('/actions/event/complete', ActionController.completeEvent);
