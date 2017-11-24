@@ -2,4 +2,4 @@
 echo "removing type files in UI"
 rm -r ../../../ava-ui/src/sharedTypes
 echo "copying files from API to UI"
-cp -r . ../../../ava-ui/src/sharedTypes
+cp -r ./sharedTypes ../../../ava-ui/src/sharedTypes
