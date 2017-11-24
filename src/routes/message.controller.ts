@@ -24,7 +24,6 @@ import {
   IMessage,
   IMessageAPI,
   MediumType,
-  MEDIUM_TYPE,
   MESSAGE_MEDIUM,
   IUserAPI,
   IStudyAPI,
@@ -130,7 +129,7 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
 
   debug('Sending message:');
   switch (mediumType) {
-    case MEDIUM_TYPE.SMS:
+    case MESSAGE_MEDIUM.SMS:
       messageService.sendSMSHelper({
         content,
         recipient: userData.tel,
@@ -159,7 +158,7 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
         }
       });
       break;
-    case MEDIUM_TYPE.EMAIL:
+    case MESSAGE_MEDIUM.EMAIL:
       messageService.sendEmailHelper({
         messageType,
         content,
@@ -192,7 +191,7 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
         }
       });
       break;
-    case MEDIUM_TYPE.APP:
+    case MESSAGE_MEDIUM.APP:
       debug(`UNIMPLEMENTED: sending APP message`);
       res.sendStatus(501);
       break;

@@ -9,8 +9,8 @@ import {
   IMessage,
   ITask,
   IUser,
-  MessageMedium,
   MessageType,
+  MediumType,
 } from './../db/sharedTypes';
 import {
   MessageModel,
@@ -35,7 +35,7 @@ interface ISMSHelper {
 interface ICreateMessage {
   userId: string;
   studyId?: string | null;
-  mediumType: MessageMedium;
+  mediumType: MediumType;
   messageType: MessageType;
   content: string;
 }
