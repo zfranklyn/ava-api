@@ -86,8 +86,11 @@ MainRouter.get('/task/:taskId/statuses', TaskController.getStatuses);
 
 /* ACTIONS */
 // Adds association between a user and a study
+// ?studyId, ?userId
 MainRouter.post('/actions/addUserToStudy', ActionController.addUserToStudy);
 // Removes association between user and a study
+// ?studyId, ?userId
 MainRouter.post('/actions/removeUserFromStudy', ActionController.removeUserFromStudy);
 // Qualtrics endpoint for completing a survey task
+// ?eventId
 MainRouter.post('/actions/event/complete', ActionController.completeEvent);

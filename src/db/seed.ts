@@ -21,10 +21,10 @@ import { db } from './_db';
 
 export const seedDatabase = async () => {
   debug('Seeding Database');
-  await seedParticipants(100);
+  await seedParticipants(20);
   await seedResearchers();
   await seedStudies(3);
-  await seedTasks(3);
+  await seedTasks(1);
   debug('Seed Completed');
 };
 

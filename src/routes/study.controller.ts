@@ -158,6 +158,7 @@ export const updateStudy = (req: Request, res: Response, next: NextFunction) => 
         return foundStudy.updateAttributes(req.body)
         .then((updatedStudy: any) => {
           debug(`Success: updated Study #${studyId}`);
+          res.json(updatedStudy);
         });
       } else {
         debug(`Failed: study not found`);

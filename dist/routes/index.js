@@ -78,8 +78,11 @@ exports.MainRouter.delete('/task/:taskId', TaskController.deleteTask);
 exports.MainRouter.get('/task/:taskId/statuses', TaskController.getStatuses);
 /* ACTIONS */
 // Adds association between a user and a study
+// ?studyId, ?userId
 exports.MainRouter.post('/actions/addUserToStudy', ActionController.addUserToStudy);
 // Removes association between user and a study
+// ?studyId, ?userId
 exports.MainRouter.post('/actions/removeUserFromStudy', ActionController.removeUserFromStudy);
 // Qualtrics endpoint for completing a survey task
+// ?eventId
 exports.MainRouter.post('/actions/event/complete', ActionController.completeEvent);
