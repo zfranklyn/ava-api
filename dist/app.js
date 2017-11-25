@@ -8,6 +8,7 @@ var routes_1 = require("./routes");
 var app = express();
 exports.app = app;
 // view engine setup
+// app.use(cors());
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

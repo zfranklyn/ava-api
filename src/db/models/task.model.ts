@@ -19,6 +19,10 @@ export const TaskModel = db.define<ITaskAPI, any>('task', {
       type: Sequelize.TEXT,
       allowNull: true,
   },
+  description: {
+      type: Sequelize.TEXT,
+      allowNull: true,
+  },
   mediumType: {
       type: Sequelize.ENUM('EMAIL', 'SMS', 'APP'),
       allowNull: false,

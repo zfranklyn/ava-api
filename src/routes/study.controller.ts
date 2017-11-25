@@ -24,7 +24,7 @@ import {
 // Gets all studies in database, truncated data (for bulk display)
 export const getAllStudies = (req: Request, res: Response, next: NextFunction) => {
   const { includeArchived, detailed } = req.query;
-  let searchParams = {where: {}};
+  let searchParams = {where: {}, order: [['updatedAt', 'DESC']]};
 
   // only return archived posts if specified
   if (includeArchived === 'false') {

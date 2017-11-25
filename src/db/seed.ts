@@ -23,7 +23,8 @@ export const seedDatabase = async () => {
   debug('Seeding Database');
   await seedParticipants(20);
   await seedResearchers();
-  await seedStudies(3);
+  await seedStudies(100);
+  await seedCustomMessages(3);
   await seedTasks(1);
   debug('Seed Completed');
 };
@@ -87,6 +88,7 @@ const seedStudies = async (num: number) => {
           'Survey announcement, introduction to the system',
         ]),
         metadata: JSON.stringify({surveyLink: 'www.franklyn.xyz'}),
+        active: faker.helpers.randomize([true, false]),
       })
       .then((newStudy: any) => {
         // assign administrators
@@ -114,6 +116,21 @@ const seedStudies = async (num: number) => {
   });
 };
 
+const seedCustomMessages = async (numTasks: number) => {
+  debug(`Seeding ${numTasks} custom messages`);
+  const allStudies = await StudyModel.findAll();
+  allStudies.map(async (study: any) => {
+    const newTask = await TaskModel.create({
+      scheduledTime: new Date(),
+      type: 'CUSTOM_MESSAGE',
+      message: 'Hello, ${firstName}!',
+      mediumType: 'SMS',
+      description: 'Custom announcement',
+    });
+    await study.addTask(newTask);
+  });
+};
+
 const seedTasks = async (numTasks: number) => {
   return new Promise ((resolve, reject) => {
     debug(`Creating ${numTasks} Tasks`);
@@ -126,13 +143,13 @@ const seedTasks = async (numTasks: number) => {
             scheduledTime: new Date(),
             type: 'SURVEY',
             mediumType: 'SMS',
+            description: 'SMS Message',
             message: faker.lorem.sentences(2),
-            completed: false,
+            completed: faker.helpers.randomize([false, true]),
           }).then(async (createdTask: any) => {
             // Create events for each task
             UserModel.findAll()
             .then((allUsers: any) => {
-              debug(`Creating statuses for ${allStudies.length * numTasks} Surveys & ${allUsers.length} Users`);
               allUsers.map((user: any) => {
                 StatusModel.create()
                 .then((createdStatus: any) => {
@@ -147,6 +164,7 @@ const seedTasks = async (numTasks: number) => {
                 scheduledTime: new Date(),
                 type: 'REMINDER',
                 mediumType: 'SMS',
+                description: `Reminder Number ${m + 1} for Survey ${createdTask.id}, Study ${study.id}`,
                 message: `Reminder Number ${m + 1} for Survey ${createdTask.id}, Study ${study.id}`,
                 completed: false,
               })

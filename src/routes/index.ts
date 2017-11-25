@@ -13,6 +13,7 @@
 import {
   Router,
 } from 'express';
+import * as cors from 'cors';
 
 import * as MessageController from './message.controller';
 import * as StudyController from './study.controller';

@@ -2,6 +2,7 @@ import * as bodyParser from 'body-parser';
 import * as express from 'express';
 import * as logger from 'morgan';
 import * as path from 'path';
+import * as cors from 'cors';
 
 import {
   MainRouter,
@@ -10,6 +11,7 @@ import {
 const app: express.Application = express();
 
 // view engine setup
+// app.use(cors());
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
