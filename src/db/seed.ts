@@ -1,6 +1,7 @@
 // Seed File for Database
 // tslint:disable-next-line
 const debug = require('debug')('debug/seed');
+import * as moment from 'moment';
 
 import * as faker from 'faker';
 import {
@@ -89,6 +90,7 @@ const seedStudies = async (num: number) => {
         ]),
         metadata: JSON.stringify({surveyLink: 'www.franklyn.xyz'}),
         active: faker.helpers.randomize([true, false]),
+        archived: faker.helpers.randomize([true, false, false, false]),
       })
       .then((newStudy: any) => {
         // assign administrators
@@ -121,7 +123,7 @@ const seedCustomMessages = async (numTasks: number) => {
   const allStudies = await StudyModel.findAll();
   allStudies.map(async (study: any) => {
     const newTask = await TaskModel.create({
-      scheduledTime: new Date(),
+      scheduledTime: Date(),
       type: 'CUSTOM_MESSAGE',
       message: 'Hello, ${firstName}!',
       mediumType: 'SMS',
@@ -140,7 +142,7 @@ const seedTasks = async (numTasks: number) => {
       allStudies.map(async (study: any) => {
         for (let n = 0; n < numTasks; n++) {
           await TaskModel.create({
-            scheduledTime: new Date(),
+            scheduledTime: Date(),
             type: 'SURVEY',
             mediumType: 'SMS',
             description: 'SMS Message',
@@ -161,7 +163,7 @@ const seedTasks = async (numTasks: number) => {
 
             for (let m = 0; m < 3; m++) {
               TaskModel.create({
-                scheduledTime: new Date(),
+                scheduledTime: Date(),
                 type: 'REMINDER',
                 mediumType: 'SMS',
                 description: `Reminder Number ${m + 1} for Survey ${createdTask.id}, Study ${study.id}`,

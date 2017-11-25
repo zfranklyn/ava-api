@@ -66,6 +66,8 @@ exports.MainRouter.put('/user/:userId', UserController.updateUser);
 /* TASK ROUTES */
 // Get all tasks in DB
 exports.MainRouter.get('/tasks', TaskController.getAllTasks);
+// Get all data for a single task
+exports.MainRouter.get('/task/:taskId', TaskController.getTask);
 // Get all tasks from a specific Study (and all associations)
 exports.MainRouter.get('/tasks/study/:studyId', TaskController.getTasksForStudy);
 // Create a task for a specific study; must specify ParentSurveyTaskId if it is a REMINDER

@@ -38,6 +38,22 @@ export const getAllTasks = (req: Request, res: Response, next: NextFunction) => 
     });
 };
 
+export const getTask = (req: Request, res: Response, next: NextFunction) => {
+  const { taskId } = req.params;
+  debug(`Request: retrieve Tasks ${taskId} in DB`);
+
+  TaskModel.findById(taskId)
+    .then((task: any) => {
+      debug(`Success: retrieved Task #${taskId}`);
+      res.json(task);
+    })
+    .catch((err: Error) => {
+      debug(`Failed: could not retrieve all tasks in DB`);
+      debug(err);
+      next(err);
+    });
+};
+
 export const getTasksForStudy = (req: Request, res: Response, next: NextFunction) => {
   const { studyId } = req.params;
   debug(`Request: retrieve all tasks for Study #${studyId}`);
@@ -46,6 +62,7 @@ export const getTasksForStudy = (req: Request, res: Response, next: NextFunction
     where: {
       studyId,
     },
+    order: [['scheduledTime', 'DESC']],
     include: [{model: StatusModel, as: 'SurveyStatus'}],
   })
     .then((tasksFromStudy: ITaskAPI[]) => {

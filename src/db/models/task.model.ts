@@ -8,7 +8,7 @@ import {
 
 export const TaskModel = db.define<ITaskAPI, any>('task', {
   scheduledTime: {
-      type: Sequelize.TIME,
+      type: Sequelize.DATE,
       allowNull: false,
   },
   type: {
