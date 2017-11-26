@@ -42,7 +42,14 @@ export const getTask = (req: Request, res: Response, next: NextFunction) => {
   const { taskId } = req.params;
   debug(`Request: retrieve Tasks ${taskId} in DB`);
 
-  TaskModel.findById(taskId)
+  TaskModel.find({
+    where: {
+      id: taskId,
+    },
+    include: [
+      // { model: TaskModel, as: 'SurveyStatus'},
+    ],
+  })
     .then((task: any) => {
       debug(`Success: retrieved Task #${taskId}`);
       res.json(task);
@@ -83,8 +90,8 @@ export const createTaskForStudy = async (req: Request, res: Response, next: Next
     Request: create new task for Study #${studyId}
       type: ${type}
       ParentSurveyTaskId: ${ParentSurveyTaskId || 'NA'}
-      ${req.body}
   `);
+  debug(req.body);
 
   // Does the specified study exist?
   StudyModel.findById(studyId)
@@ -130,6 +137,15 @@ export const createTaskForStudy = async (req: Request, res: Response, next: Next
                 next(err);
               });
           }
+        });
+      } else {
+        foundStudy.addTask(createdTask)
+        .then((newTask: any) => {
+          res.json(newTask);
+        })
+        .catch((err: Error) => {
+          debug(err);
+          next(err);
         });
       }
     })
