@@ -69,7 +69,7 @@ export const getTasksForStudy = (req: Request, res: Response, next: NextFunction
     where: {
       studyId,
     },
-    order: [['scheduledTime', 'DESC']],
+    order: [['scheduledTime']],
     include: [{model: StatusModel, as: 'SurveyStatus'}],
   })
     .then((tasksFromStudy: ITaskAPI[]) => {
@@ -114,7 +114,8 @@ export const createTaskForStudy = async (req: Request, res: Response, next: Next
           if (!parentSurveyTask) {
             debug(`Failed: Parent task for reminder does not exist`);
             next(new Error(`Parent Survey Task ${ParentSurveyTaskId} does not exist`));
-          } else if (parentSurveyTask.dataValues.messageType !== TASK_TYPE.SURVEY) {
+          } else if (parentSurveyTask.dataValues.type !== TASK_TYPE.SURVEY) {
+            debug(parentSurveyTask);
             debug(`Failed: Parent survey task is not a survey`);
             next(new Error(`Parent survey task for reminder is not a survey`));
           } else {
@@ -140,8 +141,8 @@ export const createTaskForStudy = async (req: Request, res: Response, next: Next
         });
       } else {
         foundStudy.addTask(createdTask)
-        .then((newTask: any) => {
-          res.json(newTask);
+        .then((updatedStudy: any) => {
+          res.json(createdTask);
         })
         .catch((err: Error) => {
           debug(err);
