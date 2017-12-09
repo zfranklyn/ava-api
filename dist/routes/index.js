@@ -25,12 +25,14 @@ exports.MainRouter.get('/studies', StudyController.getAllStudies);
 // Gets all data for a specified study
 // ?associations=true
 exports.MainRouter.get('/study/:studyId', StudyController.getStudy);
+// Gets all users associated with specified study
+exports.MainRouter.get('/study/:studyId/users', StudyController.getStudyUsers);
 // Deletes all data for a specified study
 exports.MainRouter.delete('/study/:studyId', StudyController.deleteStudy);
 // Creates a study
 exports.MainRouter.post('/study/create', StudyController.createStudy);
 // Updates a single study
-exports.MainRouter.put('/study/:studyId/update', StudyController.updateStudy);
+exports.MainRouter.put('/study/:studyId', StudyController.updateStudy);
 // Gets all tasks for a specified study
 exports.MainRouter.get('/study/:studyId/tasks', StudyController.getStudyTasks);
 // Creates a task for a specified study

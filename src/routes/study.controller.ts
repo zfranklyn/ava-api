@@ -98,6 +98,34 @@ export const getStudy = (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
+// Gets user info for one particular study
+export const getStudyUsers = (req: Request, res: Response, next: NextFunction) => {
+  const { studyId } = req.params;
+  const searchParams = {
+    where: {
+      id: studyId,
+    },
+    include: [
+      { model: UserModel },
+    ],
+  };
+
+  debug(`
+    Request: retrieve users for one particular study
+  `);
+
+  StudyModel.find(searchParams)
+    .then((study: IStudyAPI | null) => {
+      debug(`Success: retrieved data (with users) for Study #${studyId}`);
+      res.json(study);
+    })
+    .catch((err: Error) => {
+      debug(`Failed: could not retrieve data (with users) from Study #${studyId}`);
+      debug(err);
+      next(err);
+    });
+};
+
 export const createStudy = (req: Request, res: Response, next: NextFunction) => {
   const {
     title,
