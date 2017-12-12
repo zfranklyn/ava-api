@@ -115,9 +115,9 @@ export const getStudyUsers = (req: Request, res: Response, next: NextFunction) =
   `);
 
   StudyModel.find(searchParams)
-    .then((study: IStudyAPI | null) => {
+    .then((study: any) => {
       debug(`Success: retrieved data (with users) for Study #${studyId}`);
-      res.json(study);
+      res.json(study.users);
     })
     .catch((err: Error) => {
       debug(`Failed: could not retrieve data (with users) from Study #${studyId}`);

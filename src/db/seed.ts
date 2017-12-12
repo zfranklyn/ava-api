@@ -24,7 +24,7 @@ export const seedDatabase = async () => {
   debug('Seeding Database');
   await seedParticipants(20);
   await seedResearchers();
-  await seedStudies(100);
+  await seedStudies(10);
   await seedCustomMessages(3);
   await seedTasks(1);
   debug('Seed Completed');
