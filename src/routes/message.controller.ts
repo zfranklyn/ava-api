@@ -25,6 +25,7 @@ import {
   IMessageAPI,
   MediumType,
   MESSAGE_MEDIUM,
+  MessageType,
   IUserAPI,
   IStudyAPI,
 } from './../db/sharedTypes';
@@ -92,7 +93,7 @@ export const deleteMessage = (req: Request, res: Response, next: NextFunction) =
 };
 
 export const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
-  let { mediumType, messageType, content, subject, userId, studyId } = req.body;
+  let { mediumType, messageType, message, subject, userId, studyId } = req.body;
   debug(`
     Request: create new message:
       mediumType: ${mediumType}
@@ -100,7 +101,7 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
       studyId: ${studyId}
       recipient userId:${userId}
       subject:${subject}
-      content: ${content}`);
+      message: ${message}`);
 
   let userData: any | null;
   let studyData: any | null;
@@ -118,9 +119,9 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
                               JSON.parse(userData.dataValues.metadata),
                             );
   try {
-    content = messageService.interpolateMessage(content, dataToInterpolate);
+    message = messageService.interpolateMessage(message, dataToInterpolate);
     debug(`Interpolated message:`);
-    debug(`${content}`);
+    debug(`${message}`);
   } catch (err) {
     debug(err);
     next(err);
@@ -131,7 +132,7 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
   switch (mediumType) {
     case MESSAGE_MEDIUM.SMS:
       messageService.sendSMSHelper({
-        content,
+        message,
         recipient: userData.tel,
       }, (err: Error, data: any) => {
         if (err) {
@@ -141,9 +142,9 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
         } else {
           debug(`Success: SMS Sent`);
           messageService.createMessage({
-            content,
+            message,
             mediumType: MESSAGE_MEDIUM.SMS as MediumType,
-            messageType,
+            messageType: messageType as MessageType,
             userId: userData.id,
           })
             .then(() => {
@@ -160,8 +161,8 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
       break;
     case MESSAGE_MEDIUM.EMAIL:
       messageService.sendEmailHelper({
-        messageType,
-        content,
+        messageType: messageType as MessageType,
+        message,
         subject,
         userId: userData.id,
         emailAddress: userData.email,
@@ -174,9 +175,9 @@ export const sendMessage = async (req: Request, res: Response, next: NextFunctio
           debug(`Success: email sent`);
           debug(data);
           messageService.createMessage({
-            content,
+            message,
             mediumType: MESSAGE_MEDIUM.EMAIL as MediumType,
-            messageType,
+            messageType: messageType as MessageType,
             userId: userData.id,
           })
             .then(() => {
@@ -224,9 +225,9 @@ export const receiveSMS = (req: Request, res: Response, next: NextFunction) => {
       if (foundUser) {
         debug(`Identified User: ${foundUser.id}`);
         messageService.createMessage({
-          content: Body,
-          mediumType: 'SMS',
-          messageType: 'REPLY',
+          message: Body,
+          mediumType: 'SMS' as MediumType,
+          messageType: 'REPLY' as MessageType,
           userId: foundUser.id,
         })
         .then((createdMessage: any) => {
@@ -239,12 +240,12 @@ export const receiveSMS = (req: Request, res: Response, next: NextFunction) => {
 
         // Respond with empty message to prevent Twilio error
         const twiml = messageService.generateEmptyResponse();
-        res.writeHead(200, {'Content-Type': 'text/json'});
+        res.writeHead(200, {'message-Type': 'text/json'});
         res.end(twiml.toString());
       } else {
         debug(`Error: unidentified user`);
         const twiml = messageService.generateEmptyResponse();
-        res.writeHead(200, {'Content-Type': 'text/json'});
+        res.writeHead(200, {'message-Type': 'text/json'});
         res.end(twiml.toString());
       }
     })

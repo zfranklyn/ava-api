@@ -5,6 +5,7 @@
  */
 
 import * as express from 'express';
+import { schedule } from './cron';
 
 import { app } from '../app';
 import db from '../db';
@@ -99,10 +100,13 @@ function onListening() {
 }
 
 function connectDB() {
-  db.sync({force: true})
+  return db.sync({force: true})
   .then(() => {
     debug('Database is Connected');
-    seedDatabase();
+    return seedDatabase();
+  })
+  .then(() => {
+    schedule.start();
   })
   .catch((err: Error) => {
     debug('Database Connection Failed');

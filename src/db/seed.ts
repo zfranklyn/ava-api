@@ -22,12 +22,79 @@ import { db } from './_db';
 
 export const seedDatabase = async () => {
   debug('Seeding Database');
-  await seedParticipants(20);
-  await seedResearchers();
-  await seedStudies(10);
-  await seedCustomMessages(3);
-  await seedTasks(1);
+  // await seedParticipants(20);
+  // await seedResearchers();
+  // await seedStudies(10);
+  // await seedCustomMessages(3);
+  // await seedTasks(1);
+  await createRealData();
   debug('Seed Completed');
+};
+
+const createRealData = async () => {
+  StudyModel.create({
+    title: 'Yale Wellbeing Project',
+    description: 'This is study exists for system testing purposes',
+    metadata: JSON.stringify({surveyLink: 'www.franklyn.xyz'}),
+    active: true,
+    archived: false,
+  })
+  .then((newStudy: any) => {
+    UserModel.create({
+      firstName: 'Franklyn',
+      lastName: 'Zhu',
+      email: 'zfranklyn@gmail.com',
+      tel: '+16509467649',
+      userType: 'RESEARCHER',
+      userRole: 'ADMIN',
+      username: 'zfranklyn',
+      password: 'password',
+      metadata: JSON.stringify({firstName: 'Franklyn'}),
+    })
+    .then((newUser: any) => {
+      TaskModel.create({
+        scheduledTime: moment(Date()).add(35, 'seconds'),
+        messageType: 'REMINDER',
+        mediumType: 'SMS',
+        description: `Reminder`,
+        message: 'Reminder for ${firstName}',
+        completed: true,
+      })
+      .then((newTask: any) => {
+        newStudy.addUser(newUser);
+        newStudy.addTask(newTask);
+      });
+
+      TaskModel.create({
+        scheduledTime: moment(Date()).add(35, 'seconds'),
+        messageType: 'REMINDER',
+        mediumType: 'EMAIL',
+        subject: 'REMINDER',
+        description: `Reminder 2`,
+        message: 'Reminder for ${firstName}',
+        completed: false,
+      })
+      .then((newTask: any) => {
+        newStudy.addUser(newUser);
+        newStudy.addTask(newTask);
+      });
+
+      TaskModel.create({
+        scheduledTime: moment(Date()).add(10, 'seconds'),
+        messageType: 'SURVEY',
+        mediumType: 'EMAIL',
+        subject: 'Email',
+        description: `Survey`,
+        message: 'Hello, ${firstName}! Survey is here: ${surveyLink}',
+        completed: false,
+      })
+      .then((newTask: any) => {
+        newStudy.addUser(newUser);
+        newStudy.addTask(newTask);
+      });
+    });
+  });
+
 };
 
 const seedParticipants = async (num: number) => {
@@ -124,7 +191,7 @@ const seedCustomMessages = async (numTasks: number) => {
   allStudies.map(async (study: any) => {
     const newTask = await TaskModel.create({
       scheduledTime: Date(),
-      type: 'CUSTOM_MESSAGE',
+      messageType: 'CUSTOM_MESSAGE',
       message: 'Hello, ${firstName}!',
       mediumType: 'SMS',
       description: 'Custom announcement',
@@ -143,7 +210,7 @@ const seedTasks = async (numTasks: number) => {
         for (let n = 0; n < numTasks; n++) {
           await TaskModel.create({
             scheduledTime: Date(),
-            type: 'SURVEY',
+            messageType: 'SURVEY',
             mediumType: 'SMS',
             description: 'SMS Message',
             message: faker.lorem.sentences(2),
@@ -164,7 +231,7 @@ const seedTasks = async (numTasks: number) => {
             for (let m = 0; m < 3; m++) {
               TaskModel.create({
                 scheduledTime: Date(),
-                type: 'REMINDER',
+                messageType: 'REMINDER',
                 mediumType: 'SMS',
                 description: `Reminder Number ${m + 1} for Survey ${createdTask.id}, Study ${study.id}`,
                 message: `Reminder Number ${m + 1} for Survey ${createdTask.id}, Study ${study.id}`,

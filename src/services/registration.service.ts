@@ -9,7 +9,6 @@ import {
   ITask,
   IUser,
   IUserAPI,
-  MessageMedium,
   MessageType,
 } from './../db/sharedTypes';
 import {
@@ -44,12 +43,12 @@ class RegistrationService {
       if (foundUser) {
         messageService.sendSMSHelper({
           recipient: tel,
-          content: `You have already registered, User #${foundUser.id}`,
+          message: `You have already registered, User #${foundUser.id}`,
         }, debug);
       } else {
         messageService.sendSMSHelper({
           recipient: tel,
-          content: `Welcome to AVA! Please register at the following link: ${this.registrationLink}/${tel}`,
+          message: `Welcome to AVA! Please register at the following link: ${this.registrationLink}/${tel}`,
         }, debug);
       }
     });

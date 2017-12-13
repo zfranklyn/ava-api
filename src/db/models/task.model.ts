@@ -11,7 +11,7 @@ export const TaskModel = db.define<ITaskAPI, any>('task', {
       type: Sequelize.DATE,
       allowNull: false,
   },
-  type: {
+  messageType: {
       type: Sequelize.ENUM('CUSTOM_MESSAGE', 'SURVEY', 'REMINDER', 'RESET'),
       allowNull: false,
   },
@@ -22,6 +22,10 @@ export const TaskModel = db.define<ITaskAPI, any>('task', {
   description: {
       type: Sequelize.TEXT,
       allowNull: true,
+  },
+  subject: {
+    type: Sequelize.TEXT,
+    allowNull: true,
   },
   mediumType: {
       type: Sequelize.ENUM('EMAIL', 'SMS', 'APP'),

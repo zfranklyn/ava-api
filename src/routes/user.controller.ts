@@ -24,6 +24,7 @@ export const getAllUsers = (req: Request, res: Response, next: NextFunction) => 
 
   let searchParams = {
     offset: (start) ? start : 0,
+    include: [{all: true}, { model: StudyModel }],
   };
 
   if (limit) {

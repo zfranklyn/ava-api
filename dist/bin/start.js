@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var cron_1 = require("./cron");
 var app_1 = require("../app");
 var db_1 = require("../db");
 var seed_1 = require("../db/seed");
@@ -74,10 +75,13 @@ function onListening() {
     debug('Listening on ' + bind);
 }
 function connectDB() {
-    db_1.default.sync({ force: true })
+    return db_1.default.sync({ force: true })
         .then(function () {
         debug('Database is Connected');
-        seed_1.seedDatabase();
+        return seed_1.seedDatabase();
+    })
+        .then(function () {
+        cron_1.schedule.start();
     })
         .catch(function (err) {
         debug('Database Connection Failed');

@@ -23,13 +23,13 @@ interface IEmailHelper {
   emailAddress: string;
   userId: string;
   subject: string;
-  content: string;
+  message: string;
   messageType: MessageType;
 }
 
 interface ISMSHelper {
   recipient: string;
-  content: string;
+  message: string;
 }
 
 interface ICreateMessage {
@@ -37,7 +37,7 @@ interface ICreateMessage {
   studyId?: string | null;
   mediumType: MediumType;
   messageType: MessageType;
-  content: string;
+  message: string;
 }
 
 class MessageService {
@@ -60,7 +60,7 @@ class MessageService {
   */
   public sendSMSHelper = (obj: ISMSHelper, callback: any) => {
     this.twilioClient.messages.create({
-      body: obj.content,
+      body: obj.message,
       to: obj.recipient,
       from: this.twilioNumber,
     }, callback);
@@ -72,7 +72,7 @@ class MessageService {
     http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SES.html
   */
   public sendEmailHelper = (obj: IEmailHelper, callback: any) => {
-
+    debug(obj);
     // Parameter object to pass onto AWS API
     const params = {
       Destination: {
@@ -85,12 +85,12 @@ class MessageService {
           // for HTML compatible clients
           Html: {
             Charset: 'UTF-8',
-            Data: obj.content,
+            Data: obj.message,
           },
           // for raw text rendering
           Text: {
             Charset: 'UTF-8',
-            Data: obj.content,
+            Data: obj.message,
           },
         },
         Subject: {
@@ -113,14 +113,14 @@ class MessageService {
   Further needs to specify:
   * who is the recipient or sender?
   * what's the medium? (medium)
-  * was this sent automatically, or manually? (messageType)
+  * was this sent automatically, or manually? (type)
   */
   public createMessage = (obj: ICreateMessage) => {
     debug(`Creating Message Entry`);
-    debug(obj);
-    const { content, mediumType, messageType, userId } = obj;
+    // debug(obj);
+    const { message, mediumType, messageType, userId } = obj;
     return MessageModel.create({
-      content, mediumType, messageType,
+      message, mediumType, messageType,
       userId,
     });
   }
@@ -138,7 +138,7 @@ class MessageService {
   */
   public interpolateMessage = (message: string, data: object) => {
     debug(`Interpolating Data`);
-    debug(data);
+    // debug(data);
     const compiled = _.template(message);
     return compiled(data);
   }

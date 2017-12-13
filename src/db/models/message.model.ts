@@ -6,7 +6,7 @@ import {
 } from './../sharedTypes';
 
 export const MessageModel = db.define<IMessageAPI, any>('message', {
-  content: {
+  message: {
       type: Sequelize.TEXT,
       allowNull: false,
   },
