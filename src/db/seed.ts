@@ -54,7 +54,7 @@ const createRealData = async () => {
     .then((newUser: any) => {
       TaskModel.create({
         scheduledTime: moment(Date()).add(35, 'seconds'),
-        messageType: 'REMINDER',
+        taskType: 'CUSTOM_MESSAGE',
         mediumType: 'SMS',
         description: `Reminder`,
         message: 'Reminder for ${firstName}',
@@ -67,12 +67,12 @@ const createRealData = async () => {
 
       TaskModel.create({
         scheduledTime: moment(Date()).add(35, 'seconds'),
-        messageType: 'REMINDER',
+        taskType: 'SURVEY',
         mediumType: 'EMAIL',
-        subject: 'REMINDER',
-        description: `Reminder 2`,
-        message: 'Reminder for ${firstName}',
-        completed: false,
+        subject: 'SURVEY',
+        description: `Survey 2`,
+        message: 'Survey for ${firstName}',
+        completed: true,
       })
       .then((newTask: any) => {
         newStudy.addUser(newUser);
@@ -81,12 +81,12 @@ const createRealData = async () => {
 
       TaskModel.create({
         scheduledTime: moment(Date()).add(10, 'seconds'),
-        messageType: 'SURVEY',
+        taskType: 'SURVEY',
         mediumType: 'EMAIL',
         subject: 'Email',
         description: `Survey`,
         message: 'Hello, ${firstName}! Survey is here: ${surveyLink}',
-        completed: false,
+        completed: true,
       })
       .then((newTask: any) => {
         newStudy.addUser(newUser);
@@ -191,7 +191,7 @@ const seedCustomMessages = async (numTasks: number) => {
   allStudies.map(async (study: any) => {
     const newTask = await TaskModel.create({
       scheduledTime: Date(),
-      messageType: 'CUSTOM_MESSAGE',
+      taskType: 'CUSTOM_MESSAGE',
       message: 'Hello, ${firstName}!',
       mediumType: 'SMS',
       description: 'Custom announcement',
@@ -210,7 +210,7 @@ const seedTasks = async (numTasks: number) => {
         for (let n = 0; n < numTasks; n++) {
           await TaskModel.create({
             scheduledTime: Date(),
-            messageType: 'SURVEY',
+            taskType: 'SURVEY',
             mediumType: 'SMS',
             description: 'SMS Message',
             message: faker.lorem.sentences(2),
@@ -231,7 +231,7 @@ const seedTasks = async (numTasks: number) => {
             for (let m = 0; m < 3; m++) {
               TaskModel.create({
                 scheduledTime: Date(),
-                messageType: 'REMINDER',
+                taskType: 'REMINDER',
                 mediumType: 'SMS',
                 description: `Reminder Number ${m + 1} for Survey ${createdTask.id}, Study ${study.id}`,
                 message: `Reminder Number ${m + 1} for Survey ${createdTask.id}, Study ${study.id}`,

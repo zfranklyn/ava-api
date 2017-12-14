@@ -37,7 +37,7 @@ export const schedule = new CronJob('0,30 * * * * *', () => {
           return study.getUsers()
             .then((allUsers: any[]) => {
               allUsers.forEach((user: any ) => {
-                let { mediumType, messageType, message, subject } = task;
+                let { mediumType, taskType, message, subject } = task;
 
                 const dataToInterpolate = Object.assign(
                   {},
@@ -70,7 +70,7 @@ export const schedule = new CronJob('0,30 * * * * *', () => {
                         messageService.createMessage({
                           message,
                           mediumType: MESSAGE_MEDIUM.SMS as MediumType,
-                          messageType: messageType as MessageType,
+                          messageType: taskType as MessageType,
                           userId: user.id,
                         })
                           .then(() => {
@@ -85,7 +85,7 @@ export const schedule = new CronJob('0,30 * * * * *', () => {
                     break;
                   case MESSAGE_MEDIUM.EMAIL:
                     messageService.sendEmailHelper({
-                      messageType,
+                      messageType: taskType as MessageType,
                       message,
                       subject,
                       userId: user.id,
@@ -100,7 +100,7 @@ export const schedule = new CronJob('0,30 * * * * *', () => {
                         messageService.createMessage({
                           message,
                           mediumType: MESSAGE_MEDIUM.EMAIL as MediumType,
-                          messageType,
+                          messageType: taskType as MessageType,
                           userId: user.id,
                         })
                           .then(() => {
@@ -125,7 +125,7 @@ export const schedule = new CronJob('0,30 * * * * *', () => {
         });
       });
     } else {
-      // debug('No Tasks');
+      debug('No Tasks');
     }
   });
 });

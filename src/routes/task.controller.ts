@@ -85,10 +85,10 @@ export const getTasksForStudy = (req: Request, res: Response, next: NextFunction
 
 export const createTaskForStudy = async (req: Request, res: Response, next: NextFunction) => {
   const { studyId } = req.params;
-  const { type, ParentSurveyTaskId } = req.body;
+  const { taskType, ParentSurveyTaskId } = req.body;
   debug(`
     Request: create new task for Study #${studyId}
-      type: ${type}
+      type: ${taskType}
       ParentSurveyTaskId: ${ParentSurveyTaskId || 'NA'}
   `);
   debug(req.body);
@@ -105,7 +105,7 @@ export const createTaskForStudy = async (req: Request, res: Response, next: Next
     TaskModel.create(req.body)
     .then((createdTask: any) => {
       // if this was a reminder, then associate it with the survey
-      if (type === TASK_TYPE.REMINDER) {
+      if (taskType === TASK_TYPE.REMINDER) {
         debug(`Attempting to create Reminder for parent task #${ParentSurveyTaskId}`);
         TaskModel.findById(ParentSurveyTaskId)
         .then((parentSurveyTask: any | null) => {
@@ -114,7 +114,7 @@ export const createTaskForStudy = async (req: Request, res: Response, next: Next
           if (!parentSurveyTask) {
             debug(`Failed: Parent task for reminder does not exist`);
             next(new Error(`Parent Survey Task ${ParentSurveyTaskId} does not exist`));
-          } else if (parentSurveyTask.dataValues.type !== TASK_TYPE.SURVEY) {
+          } else if (parentSurveyTask.dataValues.taskType !== TASK_TYPE.SURVEY) {
             debug(parentSurveyTask);
             debug(`Failed: Parent survey task is not a survey`);
             next(new Error(`Parent survey task for reminder is not a survey`));
