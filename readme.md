@@ -1,45 +1,48 @@
-# AVA Database Schema
+# Automated Virtual Assessment (AVA): API
 
-The following notes outline the relational database schema for AVA's backend system. We'll use [Sequelize](http://docs.sequelizejs.com/), a Node.js ORM for RDBs, and host our Postgres DBs on Amazon RDS. Supplementary NoSQL databases will use AWS DynamoDB.
+### Introduction
+Data collection in psychological research suffers from a critical problem of low response rates. Surveys are typically sent en masse via email or hardcopy, and their accompanying reminders fail to distinguish between participants who have completed the survey and those who have not. Automated Virtual Assessment (AVA) is a web-based research suite that allows researchers to enroll participants and send scheduled messages (via both email and SMS) to these participants. This system attempts to increase response rates in two ways: first, it allows participants to receive survey links and accompanying reminders via SMS - a medium less cluttered than email inboxes; second, the system allows researchers to send personalized reminders (based on whether a participant as completed a survey) without compromising user identity, thus providing a secure channel to prompt users. 
 
-### Studies
-User creates a study in order to schedule a survey for a group of participants. It represents one interaction with a group of people. 
+This github repository contains code for AVA's API.
 
-User creates a study, specifying:
-* What survey link to send
-* Who the survey is sent to
-* How the survey is sent (SMS, Email, App)
-* How many reminders to set
 
-User can also specify the specific text used in the messages.
+### Backend Design and Implementation
+AVA’s server-side code was written in Typescript using the following libraries:
+* Node.js, which enabled development with server-side Javascript (compiled from Typescript)
+* Express, which created an easily customizable web server
+* Sequelize ORM, which enabled interaction with a Postgres database
 
-User can also send mass announcements to users, and also filter that announcement by completion status.
+#### Database and Schema Design
+While writing feature specifications for AVA, the author realized that there were many relationships between users, studies, tasks, and messages, and that this was best represented with a relational database. The author picked Postgres because it was open source, and also because it supported arrays as a data type.
 
-### Recruitment
-Participants are recruited to the platform through a few ways:
+The relationships between concepts is best illustrated in the following (hopefully self-documenting) [code snippet](/src/db/index.ts):
+```
+  UserModel.hasMany(TagModel);
+  UserModel.belongsToMany(StudyModel, {through: 'UserStudy'});
+  StudyModel.belongsToMany(UserModel, {through: 'UserStudy'});
+  UserModel.hasMany(MessageModel);
+  MessageModel.belongsTo(StudyModel);
 
-1. Sign up
-Participants proactively go to a link, fill out a complete form.
+  StudyModel.hasMany(TagModel);
+  StudyModel.belongsTo(UserModel, {as: 'Creator'});
 
-2. Text signup link
-Participants text a number, and receive a custom link to a semi-completed form
+  StudyModel.hasMany(TaskModel, { onDelete: 'cascade'});
+  TaskModel.belongsTo(StudyModel);
+  TaskModel.hasMany(StatusModel, { as: 'SurveyStatus', onDelete: 'cascade'});
+  UserModel.hasMany(StatusModel, { as: 'SurveyStatus', onDelete: 'cascade' });
+  TaskModel.hasOne(TaskModel, { // reminders are associated with a Parent Survey
+    as: 'ParentSurveyTask',
+    onDelete: 'cascade'},
+  );
+  TaskModel.hasMany(TaskModel, { as: 'Reminders'});
 
-3. Manual Add
-User can add a participant manually into the system
+```
 
-### Send Messages
+### Task Scheduling System
+One of the core features of AVA is the ability to execute scheduled tasks. This feature was implemented using a CRON job that polled the database every 30 seconds for tasks within the current minute. If tasks were found, then the server would execute the task and mark it as complete.
 
-### Tasks
-A scheduled task can be specified to send a message, initiate a reset (to a data collection period), send a reminder, or simply send an announcement. 
 
-The system will run a check every minute, and run tasks as they come up.
+### Messaging System
+One core component to message sending is text interpolation — this is achieved by looking for variables enclosed with ${}, and replacing their contents with data associated with either a study or a user. This allows researchers to send personalized messages with ease, and without compromising user identity.
 
-Example: we have a task that stipulates sending a survey to every student at Yale at 12:00PM. At 12:00PM, the system checks and discovers an active task at that minute, and executes it. It sends a couple thousand messages. 
-
-How do we keep track of who's done a message, and who has not?
-
-A Task is associated with a Study, which in turn is associated with Participants. Therefore, we should know exactly how many participants are involved. We need some way to keep track of who's done the survey and who hasn't. I think this should be linked to each individual task, because once a task is completed, it's done (and we want historic reference too, trackable back to participants).
-
-If it's a survey task, then create a 'status' for every user, and use that to keep track of response rates.
-
-That means reminders need to be linked with a 'parent' survey, so that they know who has/hasn't completed the survey.
+AVA leverages the Twilio API to send SMS, and Amazon’s Simple Email Service (SES) to send bulk messages. 

@@ -8,6 +8,9 @@ import {
   NextFunction,
 } from 'express';
 
+import * as Sequelize from 'sequelize';
+import * as moment from 'moment';
+
 const StudyRouter = Router();
 import {
   StudyModel,
@@ -207,6 +210,29 @@ export const getStudyTasks = (req: Request, res: Response, next: NextFunction) =
   TaskModel.findAll({
     where: {
       studyId,
+    },
+  })
+    .then((foundTasks: ITaskAPI[]) => {
+      debug(`Success: retrieved all ${foundTasks.length} tasks associated with Study #${studyId}`);
+      res.json(foundTasks);
+    })
+    .catch((err: Error) => {
+      debug(err);
+      next(err);
+    });
+};
+
+export const getStudyRecentTasks = (req: Request, res: Response, next: NextFunction) => {
+  const { studyId } = req.params;
+  debug(`Request: retrieve recent tasks associated with Study #${studyId}`);
+
+  TaskModel.findAll({
+    where: {
+      studyId,
+      scheduledTime: {
+        [Sequelize.Op.lt]: moment(Date()).add(7, 'days'),
+        [Sequelize.Op.gt]: moment(Date()).subtract(1, 'days'),
+      }
     },
   })
     .then((foundTasks: ITaskAPI[]) => {

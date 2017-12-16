@@ -52,10 +52,50 @@ const createRealData = async () => {
       metadata: JSON.stringify({firstName: 'Franklyn'}),
     })
     .then((newUser: any) => {
+
+      TaskModel.create({
+        scheduledTime: moment(Date()).subtract(2, 'days'),
+        taskType: 'CUSTOM_MESSAGE',
+        mediumType: 'SMS',
+        description: `Reminder`,
+        message: 'Reminder for ${firstName}',
+        completed: true,
+      })
+      .then((newTask: any) => {
+        newStudy.addUser(newUser);
+        newStudy.addTask(newTask);
+      });
+
+      TaskModel.create({
+        scheduledTime: moment(Date()).subtract(12, 'hours'),
+        taskType: 'CUSTOM_MESSAGE',
+        mediumType: 'SMS',
+        description: `Reminder`,
+        message: 'Reminder for ${firstName}',
+        completed: true,
+      })
+      .then((newTask: any) => {
+        newStudy.addUser(newUser);
+        newStudy.addTask(newTask);
+      });
+
+      TaskModel.create({
+        scheduledTime: moment(Date()).subtract(35, 'seconds'),
+        taskType: 'CUSTOM_MESSAGE',
+        mediumType: 'SMS',
+        description: `Reminder`,
+        message: 'Reminder for ${firstName}',
+        completed: true,
+      })
+      .then((newTask: any) => {
+        newStudy.addUser(newUser);
+        newStudy.addTask(newTask);
+      });
+
       TaskModel.create({
         scheduledTime: moment(Date()).add(35, 'seconds'),
         taskType: 'CUSTOM_MESSAGE',
-        mediumType: 'SMS',
+        mediumType: 'EMAIL',
         description: `Reminder`,
         message: 'Reminder for ${firstName}',
         completed: true,
@@ -72,7 +112,7 @@ const createRealData = async () => {
         subject: 'SURVEY',
         description: `Survey 2`,
         message: 'Survey for ${firstName}',
-        completed: true,
+        completed: false,
       })
       .then((newTask: any) => {
         newStudy.addUser(newUser);
@@ -80,18 +120,47 @@ const createRealData = async () => {
       });
 
       TaskModel.create({
-        scheduledTime: moment(Date()).add(10, 'seconds'),
+        scheduledTime: moment(Date()).add(3, 'days'),
         taskType: 'SURVEY',
         mediumType: 'EMAIL',
         subject: 'Email',
         description: `Survey`,
         message: 'Hello, ${firstName}! Survey is here: ${surveyLink}',
-        completed: true,
+        completed: false,
       })
       .then((newTask: any) => {
         newStudy.addUser(newUser);
         newStudy.addTask(newTask);
       });
+
+      TaskModel.create({
+        scheduledTime: moment(Date()).add(5, 'days'),
+        taskType: 'SURVEY',
+        mediumType: 'EMAIL',
+        subject: 'Email',
+        description: `Survey`,
+        message: 'Hello, ${firstName}! Survey is here: ${surveyLink}',
+        completed: false,
+      })
+      .then((newTask: any) => {
+        newStudy.addUser(newUser);
+        newStudy.addTask(newTask);
+      });
+
+      TaskModel.create({
+        scheduledTime: moment(Date()).add(8, 'days'),
+        taskType: 'SURVEY',
+        mediumType: 'EMAIL',
+        subject: 'Email',
+        description: `Late Survey`,
+        message: 'Hello, ${firstName}! Survey is here: ${surveyLink}',
+        completed: false,
+      })
+      .then((newTask: any) => {
+        newStudy.addUser(newUser);
+        newStudy.addTask(newTask);
+      });
+
     });
   });
 

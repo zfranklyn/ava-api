@@ -35,6 +35,8 @@ exports.MainRouter.post('/study/create', StudyController.createStudy);
 exports.MainRouter.put('/study/:studyId', StudyController.updateStudy);
 // Gets all tasks for a specified study
 exports.MainRouter.get('/study/:studyId/tasks', StudyController.getStudyTasks);
+// Gets all recent tasks for a specified study, ± 7 days
+exports.MainRouter.get('/study/:studyId/recentTasks', StudyController.getStudyRecentTasks);
 // Creates a task for a specified study
 exports.MainRouter.post('/study/:studyId/task', StudyController.createStudyTask);
 // Updates a task for a specified study
