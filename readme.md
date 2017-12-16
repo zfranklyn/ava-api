@@ -11,7 +11,7 @@ In order to run AVA, you must run both `ava-ui` and `ava-api` concurrently. To r
 2. Install Postgres locally (link)[https://www.postgresql.org/download/]
 3. `cd` into the root directory `/ava-api`
 4. Run `yarn` to install relevant packages
-5. Run `yarn start`. UI Development server will be listening on `localhost:3000` — navigate there on your browser.
+5. Run `yarn start`. Server will be listening on `localhost:3000`
 
 ### Backend Design and Implementation
 AVA’s server-side code was written in Typescript using the following libraries:
