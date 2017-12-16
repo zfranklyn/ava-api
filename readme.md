@@ -9,9 +9,9 @@ This github repository contains code for AVA's API.
 In order to run AVA, you must run both `ava-ui` and `ava-api` concurrently. To run `ava-api`, do the following:
 1. Clone the repository: `git clone https://github.com/zfranklyn/ava-api.git`
 2. Install Postgres locally (link)[https://www.postgresql.org/download/]
-3. `cd` into the root directory of `/ava-api`
+3. `cd` into the root directory `/ava-api`
 4. Run `yarn` to install relevant packages
-5. Run `yarn start`. Server will be listening on `localhost:8080`
+5. Run `yarn start`. UI Development server will be listening on `localhost:3000` — navigate there on your browser.
 
 ### Backend Design and Implementation
 AVA’s server-side code was written in Typescript using the following libraries:
